@@ -1,0 +1,31 @@
+Search Engine,Mode,Incognito,Autocomplete,Total Energy (Joules)
+Bing,Light Mode,False,True,972.1109066009521
+DuckDuckGo,Light Mode,False,True,983.9819860458374
+Brave Search,Light Mode,False,True,1012.8383359909058
+Qwant,Light Mode,False,True,979.2196187973022
+Mojeek,Light Mode,False,True,755.3700103759766
+Bing,Dark Mode,False,True,832.4839401245117
+DuckDuckGo,Dark Mode,False,True,808.1111097335815
+Brave Search,Dark Mode,False,True,808.1321430206299
+Qwant,Dark Mode,False,True,870.7911643981934
+Mojeek,Dark Mode,False,True,929.6425561904907
+Bing,Light Mode,True,True,847.6243839263916
+DuckDuckGo,Light Mode,True,True,1093.6165809631348
+Brave Search,Light Mode,True,True,1371.0034885406494
+Qwant,Light Mode,True,True,1259.0354089736938
+Mojeek,Light Mode,True,True,975.7895765304565
+Bing,Dark Mode,True,True,1013.8475351333618
+DuckDuckGo,Dark Mode,True,True,1016.665641784668
+Brave Search,Dark Mode,True,True,864.6194429397583
+Qwant,Dark Mode,True,True,840.7632036209106
+Mojeek,Dark Mode,True,True,746.9661483764648
+Bing,Light Mode,False,False,915.4388256072998
+DuckDuckGo,Light Mode,False,False,1002.5106191635132
+Brave Search,Light Mode,False,False,830.6246252059937
+Qwant,Light Mode,False,False,836.6474905014038
+Mojeek,Light Mode,False,False,740.5377225875854
+Bing,Dark Mode,False,False,827.4037837982178
+DuckDuckGo,Dark Mode,False,False,915.5645990371704
+Brave Search,Dark Mode,False,False,802.6322374343872
+Qwant,Dark Mode,False,False,811.7469720840454
+Mojeek,Dark Mode,False,False,730.7401657104492
