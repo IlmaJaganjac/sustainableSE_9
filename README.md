@@ -26,41 +26,41 @@ By employing a rigorous experimental setup using controlled devices and precise 
 Our experimental approach is both methodical and systematic, designed to ensure reproducibility and minimize external variability. Here’s a detailed breakdown of our methodology:
 
 1. Zen Mode Setup
-Before any measurements begin, the system is prepared in a "Zen Mode" environment. This involves:
-
+   
+  Before any measurements begin, the system is prepared in a "Zen Mode" environment. This involves:
   - Closing all unnecessary applications and services: To eliminate interference from background tasks.
   - Disabling notifications: Ensuring no pop-ups or system alerts affect performance.
   - Restricting hardware usage: Only the essential hardware is connected (e.g., disconnecting external devices like USB drives or external displays) and using a stable, wired network connection to maintain consistent power consumption levels.
 
 2. System Warm-Up
-To stabilize the hardware’s operating conditions, a Python script executes a Fibonacci sequence algorithm before the actual test begins. This “warm-up” phase ensures that:
 
+  To stabilize the hardware’s operating conditions, a Python script executes a Fibonacci sequence algorithm before the actual test begins. This “warm-up” phase ensures that:
   - CPU and hardware components reach an optimal operating temperature: Reducing initial fluctuations in power consumption.
   - Measurements reflect steady-state performance: Providing a reliable baseline for the subsequent energy measurements.
 
 3. Energy Measurement with Energibridge
-For precise energy consumption data, we employ the Energibridge tool. Energibridge directly interfaces with hardware power monitors to record:
 
+  For precise energy consumption data, we employ the Energibridge tool. Energibridge directly interfaces with hardware power monitors to record:
   - Energy consumption (in Watts)
   - CPU load
   - Network data transfer (pretty sure we don't measure this but ill leave it here cuz i might try to add it)
 
-By automating these measurements, Energibridge ensures that data is collected consistently and accurately during each test session.
+  By automating these measurements, Energibridge ensures that data is collected consistently and accurately during each test session.
 
 4. User Profile and Search Task Automation
 
-A predefined user profile is central to our experiment:
+  A predefined user profile is central to our experiment:
   - Specific interactions: The profile outlines detailed steps, including specific search queries, clicks, and other interactions across various search engines.
   - Consistent simulation: Automated scripts simulate realistic user behavior—such as toggling between dark and light modes, switching between regular and private browsing, and enabling or disabling autocomplete—ensuring that every test is performed under consistent conditions.
   - Multiple repetitions: Each search task is executed repeatedly (with the order of tasks shuffled) to capture robust data and reduce the impact of transient external factors.
 
 5. Systematic Data Collection
 
-Every phase of the experiment—from system warm-up to executing the search tasks—is carefully documented:
+  Every phase of the experiment—from system warm-up to executing the search tasks—is carefully documented:
   - Hardware and software configurations: Detailed logs of system settings, browser versions, and ambient conditions are maintained.
   - Data reproducibility: The strict adherence to protocol ensures that the collected energy consumption data can be reliably compared across different search engines and settings.
 
-This type of methodology enables us to derive meaningful insights into the energy efficiency of search engines while maintaining high experimental rigor.
+  This type of methodology enables us to derive meaningful insights into the energy efficiency of search engines while maintaining high experimental rigor.
 
 ---
 ## Unbiased Energy Data ⚖️
