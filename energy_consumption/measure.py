@@ -33,8 +33,25 @@ DURATION = 10  # Short test for checking, increase later
 # Wait interval between tests (2 minutes = 120 seconds)
 TEST_INTERVAL = 120
 
+# TODO: should be 5mins at leasts when doing the test. 
+duration = 1
 # Store Results
 results = []
+
+def warm_up(duration=duration):
+    """
+    Perform a CPU-intensive warm-up (using stress-ng if available) to bring the system
+    to a steady operational state.
+    """
+    print(f"[{datetime.now()}] Warming up system for {duration} seconds...")
+    try:
+        subprocess.run(["stress-ng", "--cpu", "4", "--timeout", str(duration)], check=True)
+    except Exception as e:
+        print(f"Warning: Warm-up encountered an error: {e}")
+    print(f"[{datetime.now()}] Warm-up complete.")
+print("Make sure your system is in zen mode \n")
+print(f"System will be warmed up for {duration} seconds \n")
+warm_up()
 
 # Loop Through Each Search Engine
 for engine, url in SEARCH_ENGINES.items():
@@ -46,6 +63,7 @@ for engine, url in SEARCH_ENGINES.items():
     # Set Browser Options
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")  # Run without UI
+
 
     # Start WebDriver
     driver = webdriver.Chrome(options=options)
