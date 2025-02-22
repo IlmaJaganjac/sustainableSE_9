@@ -78,27 +78,28 @@ Throughout each iteration, **Energibridge** logs timestamps to mark the start an
 # Conclusion
 
 
-
-# References
-1. [^energibrigde]: [Energibridge repo](https://github.com/tdurieux/EnergiBridge)  
-2. [^greenspector]:[Greenspector - Environmental impact of search engines apps](https://greenspector.com/en/search-engines/)  
-3. [^google]: [Google](https://www.google.com)  
-4. [^bing]: [Bing](https://www.bing.com)  
-5. [^yahoo]: [Yahoo](https://www.yahoo.com)  
-6. [^duckduckgo]: [DuckDuckGo](https://duckduckgo.com)  
-7. [^brave]: [Brave Search](https://search.brave.com)  
-8. [^ecosia]: [Ecosia](https://www.ecosia.org)  
-9. [^oceanhero]: [OceanHero](https://oceanhero.today)  
-10. [^startpage]: [Startpage](https://www.startpage.com)  
-11. [^qwant]: [Qwant](https://www.qwant.com)  
-12. [^swisscows]: [Swisscows](https://swisscows.com)  
-13. [^mojeek]: [Mojeek](https://www.mojeek.com)  
-14. [^metager]: [MetaGer](https://metager.org)  
-15. [^youcom]: [You.com](https://you.com)  
-16. [^perplexity]: [Perplexity AI](https://www.perplexity.ai)
-
-
 # Replication Package
 
 For researchers interested in replicating this study, the complete replication package is available at our [GitHub repository](https://github.com/your-repo-link).
+
+
+# References
+[^energibrigde]: [Energibridge repo](https://github.com/tdurieux/EnergiBridge)  
+[^greenspector]:[Greenspector - Environmental impact of search engines apps](https://greenspector.com/en/search-engines/)  
+[^google]: [Google](https://www.google.com)  
+[^bing]: [Bing](https://www.bing.com)  
+[^yahoo]: [Yahoo](https://www.yahoo.com)  
+[^duckduckgo]: [DuckDuckGo](https://duckduckgo.com)  
+[^brave]: [Brave Search](https://search.brave.com)  
+[^ecosia]: [Ecosia](https://www.ecosia.org)  
+[^oceanhero]: [OceanHero](https://oceanhero.today)  
+[^startpage]: [Startpage](https://www.startpage.com)  
+[^qwant]: [Qwant](https://www.qwant.com)  
+[^swisscows]: [Swisscows](https://swisscows.com)  
+[^mojeek]: [Mojeek](https://www.mojeek.com)  
+[^metager]: [MetaGer](https://metager.org)  
+[^youcom]: [You.com](https://you.com)  
+[^perplexity]: [Perplexity AI](https://www.perplexity.ai)
+
+
 
