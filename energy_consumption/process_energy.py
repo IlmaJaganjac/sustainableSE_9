@@ -32,6 +32,6 @@ for index, row in timestamps_df.iterrows():
 
 # Convert to DataFrame and save
 final_results_df = pd.DataFrame(final_results)
-final_results_df.to_csv("final_energy_results.csv", index=False)
+final_results_df.to_csv("results/final_energy_results.csv", index=False)
 
 print("\nFinal energy results saved as 'final_energy_results.csv'.")

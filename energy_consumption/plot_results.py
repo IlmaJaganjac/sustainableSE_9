@@ -51,5 +51,5 @@ cbar.set_label('Energy Consumption Level', rotation=270, labelpad=25)
 
 # Save and show the plot
 plt.tight_layout()
-plt.savefig("energy_consumption_plot.png", bbox_inches="tight")
+plt.savefig("plots/energy_consumption_plot.png", bbox_inches="tight")
 plt.show()

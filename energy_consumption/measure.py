@@ -99,6 +99,6 @@ for engine, url in SEARCH_ENGINES.items():
 
 # Save Timestamps
 df = pd.DataFrame(results)
-df.to_csv("search_engine_timestamps.csv", index=False)
+df.to_csv("search_engine_results/search_engine_timestamps.csv", index=False)
 
 print("\nExperiment completed! Timestamps saved as 'search_engine_timestamps.csv'.")
