@@ -20,6 +20,7 @@ In today’s digital landscape, search engines are an indispensable part of our 
 Our research is driven by the question: How does energy consumption vary across different search engines and settings during common search activities? We hypothesize that search engines designed with sustainability in mind will consume less energy than their conventional counterparts. Moreover, we investigate whether interface settings—such as dark mode versus light mode, regular versus private browsing, and the use of autocomplete—can further optimize energy usage.
 
 By employing a rigorous experimental setup using controlled devices and precise energy measurement tools, this study aims to provide actionable insights into reducing the digital carbon footprint. Join us as we delve into our methodology, examine the results, and discuss the broader implications for greener software practices.
+
 ---
 ## Methodology
 Our experimental approach is both methodical and systematic, designed to ensure reproducibility and minimize external variability. Here’s a detailed breakdown of our methodology:
@@ -47,19 +48,20 @@ For precise energy consumption data, we employ the Energibridge tool. Energibrid
 By automating these measurements, Energibridge ensures that data is collected consistently and accurately during each test session.
 
 4. User Profile and Search Task Automation
-A predefined user profile is central to our experiment:
 
+A predefined user profile is central to our experiment:
   - Specific interactions: The profile outlines detailed steps, including specific search queries, clicks, and other interactions across various search engines.
   - Consistent simulation: Automated scripts simulate realistic user behavior—such as toggling between dark and light modes, switching between regular and private browsing, and enabling or disabling autocomplete—ensuring that every test is performed under consistent conditions.
   - Multiple repetitions: Each search task is executed repeatedly (with the order of tasks shuffled) to capture robust data and reduce the impact of transient external factors.
 
 5. Systematic Data Collection
-Every phase of the experiment—from system warm-up to executing the search tasks—is carefully documented:
 
+Every phase of the experiment—from system warm-up to executing the search tasks—is carefully documented:
   - Hardware and software configurations: Detailed logs of system settings, browser versions, and ambient conditions are maintained.
   - Data reproducibility: The strict adherence to protocol ensures that the collected energy consumption data can be reliably compared across different search engines and settings.
 
 This type of methodology enables us to derive meaningful insights into the energy efficiency of search engines while maintaining high experimental rigor.
+
 ---
 ## Unbiased Energy Data ⚖️
 
