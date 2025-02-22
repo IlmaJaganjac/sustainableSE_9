@@ -80,10 +80,10 @@ Throughout each iteration, **Energibridge** logs timestamps to mark the start an
 
 # Replication Package
 
-For researchers interested in replicating this study, the complete replication package is available at our [GitHub repository](https://github.com/your-repo-link).
-
+For researchers interested in replicating this study, the complete replication package is available at our GitHub repository [^replication].
 
 # References
+[^replication]: [GitHub repository](https://github.com/IlmaJaganjac/sustainableSE_9/)
 [^energibrigde]: [Energibridge repo](https://github.com/tdurieux/EnergiBridge)  
 [^greenspector]:[Greenspector - Environmental impact of search engines apps](https://greenspector.com/en/search-engines/)  
 [^google]: [Google](https://www.google.com)  
