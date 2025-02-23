@@ -21,8 +21,6 @@ In this blog post, we outline our rigorous experimental setup—employing contro
 ### Experimental Overview
 We compare 10 different search engines: Google[^google], Bing[^bing], Yahoo[^yahoo], DuckDuckGo[^duckduckgo], Brave Search[^brave], Ecosia[^ecosia], OceanHero[^oceanhero], Startpage[^startpage], Qwant[^qwant], Swisscows[^swisscows], Mojeek[^mojeek], MetaGer[^metager], You.com[^youcom], Perplexity AI[^perplexity]
 
-
-
 ---
 
 ### Research Question and Hypothesis
@@ -38,18 +36,40 @@ Search engines optimized for sustainability (e.g., Ecosia) will consume less ene
 ### Experiment Setup
 
 #### Software and Hardware
-- **Hardware**:   
+- **Hardware**:   Add hardware here
 - **Software**:  
-  - An automated browser scripting tool (e.g., Selenium) to control the browser.  
-  - The energy profiler **EnergiBridge**[^energibrigde] is used to measure and log power consumption.  
+  - Python (v. 3.19): used to write the script to run the automated tests and log/analyze the results
+  - Selenium (v. 4.29.0): a python package used to simulate the (Chromium based) browser along with clicks and any realistic input a user would make
+  - EnergiBridge (v. 0.0.7): The energy profiler **EnergiBridge**[^energibrigde] is used to measure and log power consumption.  
 
 #### Procedure
 
-Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
+Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task such as calculating a Fibonacci seqeuence to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
 
-Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine. During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, each test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. In addition, a **1–2 minute rest interval** is observed between tests so the system can return to an idle state before the next measurement.
+Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology:
+
+- angular route uib tab
+- react setstate sub property
+- bootstrap button next to input
+- forcelayout api
+- golang copy built in
+- strlen
+- java comparator interface → java default string comparator
+- ubuntu search packages
+- URI uri = new URIBuilder
+- java throw exception example
+- mdn transform origin
+ -segmented circle css
+ -boilerplate template
+ -show is not a member of org.apache.spark.sql.GroupedData
+ -babel-jest → can’t console log in babel jest → logging in babel-jest → jest-cli
+ -json minify
+
+During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, each test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. In addition, a **1–2 minute rest interval** is observed between tests so the system can return to an idle state before the next measurement.
 
 Throughout each iteration, **Energibridge** logs timestamps to mark the start and end of the test window, and all power samples within that interval are aggregated to determine the total energy (in Joules) consumed by the search operation. 
+
+Finally, we employ statistical tests to measure the differences between all the engines and see if our data is valid (as in if they are normal) and if there is any statistical difference.
 
 # Results
 
@@ -106,6 +126,7 @@ For researchers interested in replicating this study, the complete replication p
 [^metager]: [MetaGer](https://metager.org)  
 [^youcom]: [You.com](https://you.com)  
 [^perplexity]: [Perplexity AI](https://www.perplexity.ai)
+[^developersearches]: [Developer Searches](https://medium.com/design-bootcamp/the-hidden-insights-in-developers-google-searches-47f05030cd2d)
 
 
 
