@@ -15,11 +15,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Search Engines
 SEARCH_ENGINES = {
-    # "Google": "https://www.google.com/?hl=en", 
-    "Bing": "https://www.bing.com",
+    # "Google": "https://www.google.com", 
+    # "Bing": "https://www.bing.com",
     # "Yahoo": "https://www.yahoo.com", 
     "DuckDuckGo": "https://www.duckduckgo.com",
-    # "Brave Search": "https://search.brave.com",
+    "Brave Search": "https://search.brave.com",
     # "Ecosia": "https://www.ecosia.org",
     # "OceanHero": "https://oceanhero.today",
     # "Startpage": "https://www.startpage.com",
@@ -31,7 +31,7 @@ SEARCH_ENGINES = {
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    "react setstate sub property",
+    # "react setstate sub property",
     # "bootstrap button next to input",
     # "forcelayout api",
     # "golang copy built in",
@@ -51,7 +51,7 @@ DEFAULT_DURATION = 1 #60 # Search test duration in seconds
 DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
 TEST_INTERVAL = 1 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 3 #30  # Number of test iterations
+ITERATIONS = 2 #30  # Number of test iterations
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -133,11 +133,7 @@ def handle_google(driver, query):
         search_box.send_keys(query)
         search_box.send_keys(Keys.RETURN)
         
-        # Wait for search results to load.
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.ID, "search"))
-        )
-        return True
+        # Wait for search results to load.e
     except Exception as e:
         log_message("Error with Google search: " + str(e))
         return False
@@ -449,7 +445,7 @@ def save_results(results, output_file):
     log_message(f"Results saved to {output_file}")
     
     # Print summary
-    log_message(f"Successfully tested {len(results)} out of {len(SEARCH_ENGINES)} search engines")
+    log_message(f"Successfully tested {len(results)/ITERATIONS} out of {len(SEARCH_ENGINES)} search engines")
     log_message(f"Engines tested: {', '.join(result['Search Engine'] for result in results)}")
     
     missing_engines = set(SEARCH_ENGINES.keys()) - set(result['Search Engine'] for result in results)
