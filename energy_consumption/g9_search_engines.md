@@ -95,7 +95,11 @@ Finally, we employ statistical tests to measure the differences between all the 
 
 - **Interpretation of Results:**  
   
-- **Limitations:**  
+- **Limitations:**
+  - Client-Side Focus:
+    We are limited to measuring energy consumption only on the client side. Without access to the search engines’ backend servers, we cannot account for the energy used during data processing, network transmission, and server operations. Consequently, our results reflect only a portion of the overall energy footprint of a search query.
+  - Controlled Environment vs. Real-World Conditions:
+Although we have implemented measures such as "Zen mode" and system warm-ups to reduce variability, our controlled testing environment does not perfectly replicate real-world user conditions. Variations in device hardware, background processes, and network conditions in everyday usage may lead to differences in energy consumption that our experiment does not capture, limiting the external validity of our findings.
   
 - **Future Research:**  
   - 
