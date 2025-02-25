@@ -3,17 +3,17 @@ import random
 import subprocess
 import time
 from datetime import datetime
-import random
 import pandas as pd
 
 from selenium import webdriver
-from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import (
-    NoSuchElementException, TimeoutException, WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import (
+    NoSuchElementException, TimeoutException, WebDriverException,
+    ElementClickInterceptedException)
+import logging
 
 # Search Engines
 SEARCH_ENGINES = {
@@ -73,7 +73,7 @@ def warm_up(duration=DEFAULT_WARMUP):
 
 def setup_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     # options.add_experimental_option('prefs', {
     #     'intl.accept_languages': 'en,en_US'
     # })
@@ -307,31 +307,97 @@ def handle_yahoo(driver, query):
         with open("yahoo_error_source.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
         return False
+
+def safe_click(driver, element, fallback_js=True):
+    """Attempt to click an element safely with multiple fallback methods"""
+    try:
+        # Try regular click first
+        element.click()
+        return True
+    except ElementClickInterceptedException:
+        try:
+            # Scroll element into view and try again
+            driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            time.sleep(1)  # Wait for scroll to complete
+            element.click()
+            return True
+        except Exception:
+            if fallback_js:
+                try:
+                    # Try JavaScript click as last resort
+                    driver.execute_script("arguments[0].click();", element)
+                    return True
+                except Exception as e:
+                    log_message(f"All click attempts failed: {str(e)}")
+                    return False
+    except Exception as e:
+        log_message(f"Click failed: {str(e)}")
+        return False   
     
 def handle_bing(driver, query):
+    """Handle Bing search with improved error handling and multiple fallback methods"""
     try:
-        # Handle cookie consent
-        try:
-            cookie_accept = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.ID, "bnp_btn_accept"))
-            )
-            cookie_accept.click()
-            time.sleep(1)
-        except TimeoutException:
-            log_message("No cookie dialog on Bing or already accepted")
+        log_message("Opening Bing...")
+        time.sleep(2)  # Wait for page load
         
-        # Find and use the search box
-        search_box = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.ID, "sb_form_q"))
-        )
-        search_box.clear()
-        search_box.send_keys(query)
-        search_box.send_keys(Keys.RETURN)
-        return True
+        # Handle cookie consent with explicit wait
+        try:
+            cookie_button = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.ID, "bnp_btn_accept"))
+            )
+            if safe_click(driver, cookie_button):
+                log_message("Accepted cookies")
+                time.sleep(1)
+            else:
+                log_message("Failed to click cookie accept button")
+        except TimeoutException:
+            log_message("No cookie dialog or already accepted")
+        
+        # Find and interact with search box
+        try:
+            search_box = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.ID, "sb_form_q"))
+            )
+            
+            # Clear existing text and enter query
+            search_box.clear()
+            search_box.send_keys(query)
+            time.sleep(1)  # Wait after typing
+            
+            # Try multiple submission methods
+            try:
+                # Method 1: Press Enter
+                search_box.send_keys(Keys.RETURN)
+                log_message("Search submitted via Enter key")
+            except Exception:
+                try:
+                    # Method 2: Click search button
+                    search_button = WebDriverWait(driver, 5).until(
+                        EC.presence_of_element_located((By.ID, "search_icon"))
+                    )
+                    if safe_click(driver, search_button):
+                        log_message("Search submitted via button click")
+                    else:
+                        # Method 3: Submit form via JavaScript
+                        search_form = driver.find_element(By.ID, "sb_form")
+                        driver.execute_script("arguments[0].submit();", search_form)
+                    log_message("Search submitted via form submission")
+                except Exception as e:
+                    log_message(f"All search submission methods failed: {str(e)}")
+                    return False
+            
+            # Wait for results to load
+            time.sleep(2)
+            return True
+            
+        except Exception as e:
+            log_message(f"Error interacting with search box: {str(e)}")
+            return False
+            
     except Exception as e:
-        log_message(f"Error with Bing search: {e}")
+        log_message(f"Error during Bing search: {str(e)}")
         return False
-
+    
 def handle_duckduckgo(driver, query):
     try:
         # Find the search box
