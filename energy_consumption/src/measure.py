@@ -7,7 +7,9 @@ import random
 import pandas as pd
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import (
+    NoSuchElementException, TimeoutException, WebDriverException)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
@@ -15,43 +17,43 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Search Engines
 SEARCH_ENGINES = {
-    "Google": "https://www.google.com", 
+    # "Google": "https://www.google.com", 
     "Bing": "https://www.bing.com",
-    "Yahoo": "https://www.yahoo.com", 
-    "DuckDuckGo": "https://www.duckduckgo.com",
-    "Brave Search": "https://search.brave.com",
-    "Ecosia": "https://www.ecosia.org",
-    "OceanHero": "https://oceanhero.today",
-    "Startpage": "https://www.startpage.com",
-    "Qwant": "https://www.qwant.com",
-    "Swisscows": "https://www.swisscows.com",
-    "Mojeek": "https://www.mojeek.com",
-    "You.com": "https://you.com",
+    # "Yahoo": "https://www.yahoo.com", 
+    # "DuckDuckGo": "https://www.duckduckgo.com",
+    # "Brave Search": "https://search.brave.com",
+    # "Ecosia": "https://www.ecosia.org",
+    # "OceanHero": "https://oceanhero.today",
+    # "Startpage": "https://www.startpage.com",
+    # "Qwant": "https://www.qwant.com",
+    # "Swisscows": "https://www.swisscows.com",
+    # "Mojeek": "https://www.mojeek.com",
+    # "You.com": "https://you.com",
 }
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    "react setstate sub property",
-    "bootstrap button next to input",
-    "forcelayout api",
-    "golang copy built in",
-    "strlen",
-    "java comparator interface",
-    "ubuntu search packages",
-    "URI uri = new URIBuilder",
-    "java throw exception example",
-    "mdn transform origin",
-    "segmented circle css",
-    "show is not a member of org.apache.spark.sql.GroupedData",
-    "babel-jest can't console log in babel jest",
-    "json minify"
+    # "react setstate sub property",
+    # "bootstrap button next to input",
+    # "forcelayout api",
+    # "golang copy built in",
+    # "strlen",
+    # "java comparator interface",
+    # "ubuntu search packages",
+    # "URI uri = new URIBuilder",
+    # "java throw exception example",
+    # "mdn transform origin",
+    # "segmented circle css",
+    # "show is not a member of org.apache.spark.sql.GroupedData",
+    # "babel-jest can't console log in babel jest",
+    # "json minify"
 ]
 
 DEFAULT_DURATION = 1 #60 # Search test duration in seconds
 DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
 TEST_INTERVAL = 1 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 4 #30  # Number of test iterations
+ITERATIONS = 1 #30  # Number of test iterations
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -106,95 +108,206 @@ def setup_driver():
     
     return driver
 
+
 def handle_google(driver, query):
     try:
-        # Switch into the consent iframe (if present) and click the accept button.
+        # Maximize window to ensure elements are visible
+        driver.maximize_window()
+        
+        # 1. Switch to the consent iframe if present
         try:
             WebDriverWait(driver, 10).until(
                 EC.frame_to_be_available_and_switch_to_it(
-                    (By.CSS_SELECTOR, "iframe[src^='https://consent.google.com']")
+                    (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
                 )
             )
-            WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//div[@id='introAgreeButton']"))
-            ).click()
-            time.sleep(2)  # Allow time for the dialog to close.
-            driver.switch_to.default_content()
-        except Exception as e:
-            log_message("No consent iframe found on Google or already handled: " + str(e))
+            log_message("Switched to Google consent iframe")
+        except TimeoutException:
+            log_message("No Google consent iframe found or already handled")
 
-        # Now wait for the search box to be visible and clickable.
+        # 2. Handle consent button with multi-language support
+        consent_texts = {
+            "English": "Accept All",
+            "Dutch": "Alles accepteren"
+            # Add more languages if needed, e.g.:
+            # "German": "Alle akzeptieren",
+            # "French": "Tout accepter"
+        }
+        
+        consent_accepted = False
+        for lang, text in consent_texts.items():
+            try:
+                accept_button = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
+                    )
+                )
+                # Use ActionChains for human-like click
+                actions = webdriver.ActionChains(driver)
+                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
+                log_message(f"Clicked consent button in {lang} ('{text}')")
+                consent_accepted = True
+                time.sleep(random.uniform(1, 2))
+                break
+            except TimeoutException:
+                continue
+        
+        if not consent_accepted:
+            log_message("Could not find any known consent button text")
+        
+        # Always switch back to main content
+        driver.switch_to.default_content()
+
+        # 3. Perform the search
         search_box = WebDriverWait(driver, 15).until(
             EC.element_to_be_clickable((By.NAME, "q"))
         )
-        search_box.clear()
-        search_box.send_keys(query)
-        search_box.send_keys(Keys.RETURN)
         
-        # Wait for search results to load.e
+        # Clear and input query with human-like typing
+        search_box.clear()
+        actions = webdriver.ActionChains(driver)
+        actions.move_to_element(search_box).click()
+        for char in query:
+            actions.send_keys(char).pause(random.uniform(0.1, 0.3))
+        actions.perform()
+        
+        # Submit search with random delay
+        time.sleep(random.uniform(0.5, 1.5))
+        try:
+            search_box.send_keys(Keys.RETURN)
+        except:
+            # Fallback to clicking search button
+            search_button = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.NAME, "btnK"))
+            )
+            actions.move_to_element(search_button).pause(random.uniform(0.5, 1)).click().perform()
+        
+        time.sleep(random.uniform(1, 3))  # Wait for results
+        return True
+        
     except Exception as e:
-        log_message("Error with Google search: " + str(e))
+        log_message(f"Error with Google search: {e}")
         return False
-
+    
 def handle_yahoo(driver, query):
     try:
-        # Accept the cookie consent (if present)
-        try:
-            cookie_accept = WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located(
-                    (By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]")
-                )
-            )
-            driver.execute_script("arguments[0].scrollIntoView(true);", cookie_accept)
-            driver.execute_script("arguments[0].click();", cookie_accept)
-            time.sleep(2)
-        except Exception as e:
-            log_message("No cookie dialog on Yahoo or already accepted: " + str(e))
+        # Maximize window to ensure elements are visible
         
-        # Remove the 'target' attribute from the search form so that the query stays in the same tab.
-        try:
-            driver.execute_script("document.querySelector('form').removeAttribute('target');")
-        except Exception as e:
-            log_message("Could not remove target attribute from Yahoo search form: " + str(e))
-        
-        # Locate the search box using possible locators.
-        search_box = None
-        try:
-            # Try by name ("p" is common on Yahoo).
-            search_box = WebDriverWait(driver, 15).until(
-                EC.element_to_be_clickable((By.NAME, "p"))
-            )
-        except Exception as e:
-            log_message("Could not find search box by name 'p': " + str(e))
-        
-        if not search_box:
-            try:
-                # Try by ID ("header-search-input" if available).
-                search_box = WebDriverWait(driver, 15).until(
-                    EC.element_to_be_clickable((By.ID, "header-search-input"))
-                )
-            except Exception as e:
-                log_message("Could not find search box by ID 'header-search-input': " + str(e))
-        
-        if not search_box:
-            # Fallback: generic CSS selector.
-            search_box = WebDriverWait(driver, 15).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='text']"))
-            )
-        
-        search_box.clear()
-        search_box.send_keys(query)
-        search_box.send_keys(Keys.RETURN)
-        
-        # Wait for the search results container to load.
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.ID, "web"))
+        # Wait for page to load
+        WebDriverWait(driver, 10).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
         )
-        return True
-    except Exception as e:
-        log_message("Error with Yahoo search: " + str(e))
-        return False
+        log_message("Page load complete (document.readyState)")
+        
+        # 1. Handle cookie consent popup
+        consent_texts = {
+            "Dutch": "Alles accepteren",
+            "English": "Accept All"
+        }
+        
+        consent_accepted = False
+        for lang, text in consent_texts.items():
+            try:
+                accept_button = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable(
+                        (By.XPATH, f"//button[contains(., '{text}')]")
+                    )
+                )
+                actions = webdriver.ActionChains(driver)
+                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
+                log_message(f"Clicked '{text}' on Yahoo consent popup ({lang})")
+                consent_accepted = True
+                time.sleep(random.uniform(2, 3))  # Wait for page to settle
+                break
+            except TimeoutException:
+                log_message(f"No '{text}' button found")
+                continue
+        
+        if not consent_accepted:
+            log_message("No known consent button found or already accepted")
 
+        # Wait again for page stability after cookie acceptance
+        WebDriverWait(driver, 10).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
+        log_message("Post-cookie page load complete")
+
+        # 2. Perform the search
+        log_message("Attempting to locate search box")
+        
+        # Debug: Save page source and screenshot
+        with open("yahoo_page_source.html", "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        log_message("Saved page source to 'yahoo_page_source.html'")
+        driver.save_screenshot("yahoo_page.png")
+        log_message("Saved screenshot to 'yahoo_page.png'")
+
+        # Try multiple selectors
+        selectors = [
+            (By.ID, "yschsp"),
+            (By.NAME, "p"),
+            (By.CSS_SELECTOR, "input.rapid-noclick-resp"),
+            (By.CSS_SELECTOR, "#ybar-sbq"),
+            (By.CSS_SELECTOR, "input[type='search']"),
+            (By.XPATH, "//input[@placeholder='Zoeken op het web']"),
+            (By.XPATH, "//form[@id='ybar-search-form']//input")
+        ]
+        
+        search_box = None
+        for selector_type, selector_value in selectors:
+            try:
+                log_message(f"Trying selector {selector_type}: {selector_value}")
+                search_box = WebDriverWait(driver, 3).until(
+                    EC.element_to_be_clickable((selector_type, selector_value))
+                )
+                log_message(f"Search box found with {selector_type}: {selector_value}")
+                break
+            except TimeoutException:
+                log_message(f"Selector {selector_type}: {selector_value} not found")
+                continue
+        
+        if not search_box:
+            # Last resort: JavaScript injection
+            log_message("Attempting JavaScript to find search box")
+            search_box = driver.execute_script("""
+                return document.querySelector('input[type="search"]') || 
+                       document.querySelector('input[name="p"]') || 
+                       document.querySelector('#ybar-sbq');
+            """)
+            if search_box:
+                log_message("Search box found via JavaScript")
+            else:
+                raise Exception("No search box found after all attempts")
+
+        # Input query using JavaScript to bypass interaction issues
+        log_message(f"Setting query '{query}' via JavaScript")
+        driver.execute_script("arguments[0].value = arguments[1];", search_box, query)
+        time.sleep(0.5)
+        
+        # Submit search
+        log_message("Submitting search")
+        try:
+            search_box.send_keys(Keys.RETURN)
+            log_message("Submitted via RETURN key")
+        except:
+            log_message("RETURN key failed, trying button")
+            search_button = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
+            )
+            search_button.click()
+            log_message("Submitted via button click")
+        
+        time.sleep(random.uniform(1, 3))
+        log_message("Search executed, waiting for results")
+        return True
+        
+    except Exception as e:
+        log_message(f"Error with Yahoo search: {e}")
+        driver.save_screenshot("yahoo_error.png")
+        with open("yahoo_error_source.html", "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        return False
+    
 def handle_bing(driver, query):
     try:
         # Handle cookie consent
@@ -339,8 +452,7 @@ def handle_default_search(driver, query):
     except Exception as e:
         log_message(f"Error with search: {e}")
         return False
-
-
+    
 def test_search_engine(engine, url, query, duration):
     log_message(f"Testing {engine}")
 
@@ -397,6 +509,7 @@ def test_search_engine(engine, url, query, duration):
         log_message(f"Search failed for {engine}")
         driver.quit()
         return None
+
 
 
 def run_tests(engines, queries, duration, interval):
