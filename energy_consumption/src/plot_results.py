@@ -1,168 +1,131 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+import ast
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from datetime import datetime
 
-# File path for the enhanced energy results
-RESULTS_FILE = "results/final_energy_results.csv"
-
-# def load_temperature_data(latest_energy_file):
-#     """
-#     Load the temperature data that matches the latest energy results timestamp.
-#     """
-#     # Read the latest energy results to extract the timestamp
-#     if os.path.exists(latest_energy_file):
-#         energy_df = pd.read_csv(latest_energy_file)
-#         if "" in energy_df.columns:
-#             latest_timestamp = energy_df["Run Timestamp"].iloc[0]  # Get the first row's timestamp
-#         else:
-#             log_message("Run Timestamp column missing from energy results.")
-#             return None
-#     else:
-#         log_message("Latest energy results file not found.")
-#         return None
-
-#     # Check if the corresponding temperature file exists
-#     temp_file = f"results/temperature_data_{latest_timestamp}.csv"
-#     if os.path.exists(temp_file):
-#         log_message(f"Loading matching temperature data from {temp_file}")
-#         return pd.read_csv(temp_file)
-#     else:
-#         log_message("No matching temperature data file found.")
-#         return None
-
+FINAL_ENERGY_FILE = "results/final_energy_results.csv"
+SAVE_FIG_DIR = "results/plots"
 
 def log_message(message):
     """Print a timestamped log message."""
     print(f"[{datetime.now()}] {message}")
 
-def load_results(results_file):
-    log_message(f"Loading results from {results_file}")
-    return pd.read_csv(results_file)
+def ensure_dir(path):
+    """Ensure the directory exists."""
+    os.makedirs(path, exist_ok=True)
 
-def plot_violin(results_df, metric, title, filename):
+def plot_power_across_iterations(sample_df, output_path="results/plots/power_across_iterations.png"):
+    """
+    Plots average power (W) vs. time offset (s) for each search engine.
+    - The time offset is computed per iteration: (Time - Start_Time)/1000.
+    - We then group by [Search Engine, time_offset] to average across all iterations.
+    - Finally, we plot one line per search engine with hue="Search Engine".
+    """
+    # Ensure we have the necessary columns
+    if not {"Search Engine", "Iteration", "Time", "Start_Time", "Power (W)"}.issubset(sample_df.columns):
+        print("Sample DataFrame missing required columns for power plot.")
+        return
+    
+    # 1) Compute time offset in seconds
+    sample_df = sample_df.copy()
+    sample_df["Time_s"] = (sample_df["Time"] - sample_df["Start_Time"]) / 1000.0
+    
+    # 2) Group by [Search Engine, Time_s] to average the power across all iterations
+    grouped = sample_df.groupby(["Search Engine", "Time_s"], as_index=False)["Power (W)"].mean()
+    
+    # 3) Plot with Seaborn lineplot, hue="Search Engine"
     plt.figure(figsize=(10, 6))
-    sns.violinplot(x='Search Engine', y=metric, data=results_df, inner='quartile')
-    plt.title(title)
-    plt.ylabel(metric)
-    plt.xlabel("Search Engine")
+    sns.lineplot(data=grouped, x="Time_s", y="Power (W)", hue="Search Engine", marker="o")
+    plt.title("Average Power Over Time (s) by Search Engine")
+    plt.xlabel("Time (seconds)")
+    plt.ylabel("Power (W)")
     plt.tight_layout()
-    plt.savefig(filename)
+    plt.savefig(output_path)
     plt.close()
-    log_message(f"Saved violin plot to {filename}")
+    
+    print(f"Saved power vs. time plot to {output_path}")
 
-def plot_box(results_df, metric, title, filename):
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(x='Search Engine', y=metric, data=results_df)
-    plt.title(title)
-    plt.ylabel(metric)
-    plt.xlabel("Search Engine")
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
-    log_message(f"Saved box plot to {filename}")
 
-def plot_histogram_density(results_df, metric, title, filename):
-    plt.figure(figsize=(10, 6))
-    sns.histplot(data=results_df, x=metric, hue='Search Engine', kde=True, element="step")
-    plt.title(title)
-    plt.xlabel(metric)
-    plt.ylabel("Frequency")
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
-    log_message(f"Saved histogram/density plot to {filename}")
 
-def plot_scatter(results_df, x_metric, y_metric, title, filename):
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=results_df, x=x_metric, y=y_metric, hue='Search Engine', s=100)
-    plt.title(title)
-    plt.xlabel(x_metric)
-    plt.ylabel(y_metric)
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
-    log_message(f"Saved scatter plot to {filename}")
 
 def main():
-    # Load the aggregated energy results
-    results_df = load_results(RESULTS_FILE)
+    ensure_dir(SAVE_FIG_DIR)
     
-    # Create a directory for plots if it doesn't exist
-    plots_dir = "plots"
-    os.makedirs(plots_dir, exist_ok=True)
+    # 1) Read the final energy results
+    df = pd.read_csv(FINAL_ENERGY_FILE)
     
-    # Total Energy Plots
-    plot_violin(
-        results_df, 
-        metric="Total Energy (J)", 
-        title="Violin Plot: Total Energy Consumption per Search Engine",
-        filename=os.path.join(plots_dir, "violin_total_energy.png")
-    )
-    plot_box(
-        results_df, 
-        metric="Total Energy (J)", 
-        title="Box Plot: Total Energy Consumption per Search Engine",
-        filename=os.path.join(plots_dir, "box_total_energy.png")
-    )
-    plot_histogram_density(
-        results_df, 
-        metric="Total Energy (J)", 
-        title="Histogram & Density: Total Energy Consumption",
-        filename=os.path.join(plots_dir, "hist_density_total_energy.png")
-    )
+    # Parse the "Energy Delay Product" column (which is a list string like "[123.4, 567.8, 9012.3]")
+    edp_w1, edp_w2, edp_w3 = [], [], []
+    for edp_str in df["Energy Delay Product"]:
+        try:
+            edp_list = ast.literal_eval(str(edp_str))
+            edp_w1.append(edp_list[0] if len(edp_list) > 0 else None)
+            edp_w2.append(edp_list[1] if len(edp_list) > 1 else None)
+            edp_w3.append(edp_list[2] if len(edp_list) > 2 else None)
+        except:
+            edp_w1.append(None)
+            edp_w2.append(None)
+            edp_w3.append(None)
     
-    # Average Power Plots
-    plot_violin(
-        results_df, 
-        metric="Average Power (W)", 
-        title="Violin Plot: Average Power per Search Engine",
-        filename=os.path.join(plots_dir, "violin_average_power.png")
-    )
-    plot_box(
-        results_df, 
-        metric="Average Power (W)", 
-        title="Box Plot: Average Power per Search Engine",
-        filename=os.path.join(plots_dir, "box_average_power.png")
-    )
-    plot_histogram_density(
-        results_df, 
-        metric="Average Power (W)", 
-        title="Histogram & Density: Average Power",
-        filename=os.path.join(plots_dir, "hist_density_average_power.png")
-    )
+    df["EDP_w1"] = edp_w1
+    df["EDP_w2"] = edp_w2
+    df["EDP_w3"] = edp_w3
     
-    # Energy Delay Product Plots
-    plot_violin(
-        results_df, 
-        metric="Energy Delay Product", 
-        title="Violin Plot: Energy Delay Product per Search Engine",
-        filename=os.path.join(plots_dir, "violin_energy_delay_product.png")
-    )
-    plot_box(
-        results_df, 
-        metric="Energy Delay Product", 
-        title="Box Plot: Energy Delay Product per Search Engine",
-        filename=os.path.join(plots_dir, "box_energy_delay_product.png")
-    )
-    plot_histogram_density(
-        results_df, 
-        metric="Energy Delay Product", 
-        title="Histogram & Density: Energy Delay Product",
-        filename=os.path.join(plots_dir, "hist_density_energy_delay_product.png")
-    )
+    # ----------------------------------------------------------------
+    # 1) BOX PLOT FOR EDP (w=1, w=2, w=3) IN SEPARATE FIGURES
+    #    Combine all iterations for each search engine 
+    for w_col, w_label in zip(["EDP_w1", "EDP_w2", "EDP_w3"], ["w=1", "w=2", "w=3"]):
+        plt.figure(figsize=(8, 5))
+        sns.boxplot(data=df, x="Search Engine", y=w_col)
+        plt.title(f"Energy Delay Product ({w_label}) per Search Engine")
+        plt.ylabel("EDP")
+        plt.tight_layout()
+        plt.savefig(os.path.join(SAVE_FIG_DIR, f"boxplot_edp_{w_label}.png"))
+        plt.close()
     
-    # Scatter Plot: Total Energy vs. Average Power
-    plot_scatter(
-        results_df,
-        x_metric="Total Energy (J)",
-        y_metric="Average Power (W)",
-        title="Scatter Plot: Total Energy vs. Average Power",
-        filename=os.path.join(plots_dir, "scatter_total_energy_vs_average_power.png")
-    )
+    # ----------------------------------------------------------------
+    # 2) VIOLIN PLOT OF TOTAL ENERGY (J) PER SEARCH ENGINE (ALL ITERATIONS COMBINED)
+    plt.figure(figsize=(8, 5))
+    sns.violinplot(data=df, x="Search Engine", y="Total Energy (J)", inner="box")
+    plt.title("Total Energy (J) per Search Engine")
+    plt.tight_layout()
+    plt.savefig(os.path.join(SAVE_FIG_DIR, "violin_total_energy.png"))
+    plt.close()
     
-    log_message("All plots have been generated and saved.")
+    # ----------------------------------------------------------------
+    # 3) VIOLIN PLOT FOR AVERAGE POWER (W) PER SEARCH ENGINE (ALL ITERATIONS COMBINED)
+    plt.figure(figsize=(8, 5))
+    sns.violinplot(data=df, x="Search Engine", y="Average Power (W)", inner="box")
+    plt.title("Average Power (W) per Search Engine\n")
+    plt.tight_layout()
+    plt.savefig(os.path.join(SAVE_FIG_DIR, "violin_avg_power.png"))
+    plt.close()
+    
+    # ----------------------------------------------------------------
+    # 4) HISTOGRAM OF THE AVERAGE TOTAL ENERGY OVER ALL ITERATIONS PER SEARCH ENGINE
+    #    We'll group by search engine, compute the mean total energy, and plot a bar chart.
+    avg_energy_df = df.groupby("Search Engine", as_index=False)["Total Energy (J)"].mean()
+    plt.figure(figsize=(8, 5))
+    engines = avg_energy_df["Search Engine"].unique()
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8dd3c7", "#e377c2"]
+    for engine, color in zip(engines, colors):
+        engine_df = avg_energy_df[avg_energy_df["Search Engine"] == engine]
+        plt.bar(engine_df["Search Engine"], engine_df["Total Energy (J)"], color=color, label=engine)
+    plt.legend(frameon=True, title="Search Engine", bbox_to_anchor=(1.0, 1), loc="upper left")
+    plt.title("Average Total Energy (J) per Search Engine")
+    plt.ylabel("Avg Total Energy (J)")
+    plt.xlabel("Search Engine")
+    plt.tight_layout()
+    plt.savefig(os.path.join(SAVE_FIG_DIR, "hist_avg_total_energy.png"))
+    plt.close()
+
+    sample_df = pd.read_csv("results/final_energy_samples.csv")
+    
+
+    plot_power_across_iterations(sample_df, output_path="results/plots/aggregated_metrics.png")
+    log_message(f"Plots saved in: {SAVE_FIG_DIR}")
 
 if __name__ == "__main__":
     main()

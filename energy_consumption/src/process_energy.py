@@ -77,7 +77,8 @@ def compute_energy_for_interval(subframe, key="PACKAGE_ENERGY (W)"):
     print(f"Total energy: {total_energy}")
     avg_power = subframe["Power (W)"].mean()
     print(f"Average power: {avg_power}") 
-
+    if key == "SYSTEM_POWER (Watts)":
+        return total_energy, avg_power, avg_temp, data
     return total_energy, avg_power, avg_temp, subframe
 
 def calculate_energy_consumption(timestamps_df, energy_df):
@@ -120,27 +121,26 @@ def calculate_energy_consumption(timestamps_df, energy_df):
                    "Energy Delay Product": [edp1, edp2, edp3],
                    "Temperature": avg_temp
                    }
-        log_message("columns {sample_data.columns}")
+
         for i, r in sample_data.iterrows():
-            sample_row = {
-                "Search Engine": engine,
-                "Iteration": iteration,
-                "Time": r["Time"],        # The time (ms or s)
-                "Power (W)": r["Power (W)"],  # Might be computed in compute_energy_for_interval
-            }
-            # If you have CPU usage or memory columns, add them here
-            if "CPU_USAGE" in r:
-                sample_row["CPU_USAGE"] = r["CPU_USAGE"]
-            # If you have multiple CPU_TEMP columns, you can store them or average them
-            for col in r.index:
-                if "CPU_TEMP" in col:
-                    sample_row[col] = r[col]
-            
-            if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
-                sample_row["USED_MEMORY"] = r["USED_MEMORY"]
-                sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
-            
-            sample_rows.append(sample_row)
+                    sample_row = {
+                        "Search Engine": engine,
+                        "Iteration": iteration,
+                        "Time": r["Time"],             
+                        "Start_Time": start_time,      
+                        "Power (W)": r.get("Power (W)", None),
+                    }
+                    # If CPU usage, memory, or temperature columns exist, add them
+                    if "CPU_USAGE" in r:
+                        sample_row["CPU_USAGE"] = r["CPU_USAGE"]
+                    for col in r.index:
+                        if "CPU_TEMP" in col:
+                            sample_row[col] = r[col]
+                    if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
+                        sample_row["USED_MEMORY"] = r["USED_MEMORY"]
+                        sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
+                    
+                    sample_rows.append(sample_row)
     
         results.append(res)
     iter_results_df = pd.DataFrame(results)

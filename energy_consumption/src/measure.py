@@ -15,48 +15,47 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # Search Engines
 SEARCH_ENGINES = {
-    # "Google": "https://www.google.com", 
-    # "Bing": "https://www.bing.com",
-    # "Yahoo": "https://www.yahoo.com", 
+    "Google": "https://www.google.com", 
+    "Bing": "https://www.bing.com",
+    "Yahoo": "https://www.yahoo.com", 
     "DuckDuckGo": "https://www.duckduckgo.com",
     "Brave Search": "https://search.brave.com",
-    # "Ecosia": "https://www.ecosia.org",
-    # "OceanHero": "https://oceanhero.today",
-    # "Startpage": "https://www.startpage.com",
-    # "Qwant": "https://www.qwant.com",
-    # "Swisscows": "https://www.swisscows.com",
-    # "Mojeek": "https://www.mojeek.com",
-    # "You.com": "https://you.com",
+    "Ecosia": "https://www.ecosia.org",
+    "OceanHero": "https://oceanhero.today",
+    "Startpage": "https://www.startpage.com",
+    "Qwant": "https://www.qwant.com",
+    "Swisscows": "https://www.swisscows.com",
+    "Mojeek": "https://www.mojeek.com",
+    "You.com": "https://you.com",
 }
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    # "react setstate sub property",
-    # "bootstrap button next to input",
-    # "forcelayout api",
-    # "golang copy built in",
-    # "strlen",
-    # "java comparator interface",
-    # "ubuntu search packages",
-    # "URI uri = new URIBuilder",
-    # "java throw exception example",
-    # "mdn transform origin",
-    # "segmented circle css",
-    # "show is not a member of org.apache.spark.sql.GroupedData",
-    # "babel-jest can't console log in babel jest",
-    # "json minify"
+    "react setstate sub property",
+    "bootstrap button next to input",
+    "forcelayout api",
+    "golang copy built in",
+    "strlen",
+    "java comparator interface",
+    "ubuntu search packages",
+    "URI uri = new URIBuilder",
+    "java throw exception example",
+    "mdn transform origin",
+    "segmented circle css",
+    "show is not a member of org.apache.spark.sql.GroupedData",
+    "babel-jest can't console log in babel jest",
+    "json minify"
 ]
 
 DEFAULT_DURATION = 1 #60 # Search test duration in seconds
 DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
 TEST_INTERVAL = 1 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 2 #30  # Number of test iterations
+ITERATIONS = 4 #30  # Number of test iterations
 
 def log_message(message):
     """Print a timestamped log message."""
     print(f"[{datetime.now()}] {message}")
-
 
 def warm_up(duration=DEFAULT_WARMUP):
     log_message(f"Warming up system for {duration} seconds...")
@@ -69,7 +68,6 @@ def warm_up(duration=DEFAULT_WARMUP):
     while time.time() - start_time < duration:
         fib(30)
     log_message("Warm-up complete.")
-
 
 def setup_driver():
     options = webdriver.ChromeOptions()
@@ -138,7 +136,6 @@ def handle_google(driver, query):
         log_message("Error with Google search: " + str(e))
         return False
 
-
 def handle_yahoo(driver, query):
     try:
         # Accept the cookie consent (if present)
@@ -198,7 +195,6 @@ def handle_yahoo(driver, query):
         log_message("Error with Yahoo search: " + str(e))
         return False
 
-
 def handle_bing(driver, query):
     try:
         # Handle cookie consent
@@ -223,7 +219,6 @@ def handle_bing(driver, query):
         log_message(f"Error with Bing search: {e}")
         return False
 
-
 def handle_duckduckgo(driver, query):
     try:
         # Find the search box
@@ -247,7 +242,6 @@ def handle_duckduckgo(driver, query):
         except Exception as e:
             log_message(f"Error with DuckDuckGo search: {e}")
             return False
-
 
 def handle_ecosia(driver, query):
     try:
@@ -445,8 +439,10 @@ def save_results(results, output_file):
     log_message(f"Results saved to {output_file}")
     
     # Print summary
-    log_message(f"Successfully tested {len(results)/ITERATIONS} out of {len(SEARCH_ENGINES)} search engines")
-    log_message(f"Engines tested: {', '.join(result['Search Engine'] for result in results)}")
+    tested_engines = set(result['Search Engine'] for result in results)
+    log_message(f"Successfully tested {len(tested_engines)} out of {len(SEARCH_ENGINES)} search engines")
+
+    log_message(f"Engines tested: {', '.join(tested_engines)}")
     
     missing_engines = set(SEARCH_ENGINES.keys()) - set(result['Search Engine'] for result in results)
     if missing_engines:
