@@ -17,43 +17,43 @@ import logging
 
 # Search Engines
 SEARCH_ENGINES = {
-    # "Google": "https://www.google.com", 
+    "Google": "https://www.google.com", 
     "Bing": "https://www.bing.com",
-    # "Yahoo": "https://www.yahoo.com", 
-    # "DuckDuckGo": "https://www.duckduckgo.com",
-    # "Brave Search": "https://search.brave.com",
-    # "Ecosia": "https://www.ecosia.org",
-    # "OceanHero": "https://oceanhero.today",
-    # "Startpage": "https://www.startpage.com",
-    # "Qwant": "https://www.qwant.com",
-    # "Swisscows": "https://www.swisscows.com",
-    # "Mojeek": "https://www.mojeek.com",
-    # "You.com": "https://you.com",
+    "Yahoo": "https://www.yahoo.com", 
+    "DuckDuckGo": "https://www.duckduckgo.com",
+    "Brave Search": "https://search.brave.com",
+    "Ecosia": "https://www.ecosia.org",
+    "OceanHero": "https://oceanhero.today",
+    "Startpage": "https://www.startpage.com",
+    "Qwant": "https://www.qwant.com",
+    "Swisscows": "https://www.swisscows.com",
+    "Mojeek": "https://www.mojeek.com",
+    "You.com": "https://you.com",
 }
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    # "react setstate sub property",
-    # "bootstrap button next to input",
-    # "forcelayout api",
-    # "golang copy built in",
-    # "strlen",
-    # "java comparator interface",
-    # "ubuntu search packages",
-    # "URI uri = new URIBuilder",
-    # "java throw exception example",
-    # "mdn transform origin",
-    # "segmented circle css",
-    # "show is not a member of org.apache.spark.sql.GroupedData",
-    # "babel-jest can't console log in babel jest",
-    # "json minify"
+    "react setstate sub property",
+    "bootstrap button next to input",
+    "forcelayout api",
+    "golang copy built in",
+    "strlen",
+    "java comparator interface",
+    "ubuntu search packages",
+    "URI uri = new URIBuilder",
+    "java throw exception example",
+    "mdn transform origin",
+    "segmented circle css",
+    "show is not a member of org.apache.spark.sql.GroupedData",
+    "babel-jest can't console log in babel jest",
+    "json minify"
 ]
 
-DEFAULT_DURATION = 1 #60 # Search test duration in seconds
-DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
-TEST_INTERVAL = 1 #120  # Pause between tests in seconds
+DEFAULT_DURATION = 60 #60 # Search test duration in seconds
+DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real tests)
+# TEST_INTERVAL = 120 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 1 #30  # Number of test iterations
+ITERATIONS = 30 #30  # Number of test iterations
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -73,7 +73,7 @@ def warm_up(duration=DEFAULT_WARMUP):
 
 def setup_driver():
     options = webdriver.ChromeOptions()
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     # options.add_experimental_option('prefs', {
     #     'intl.accept_languages': 'en,en_US'
     # })
@@ -190,123 +190,177 @@ def handle_google(driver, query):
         return False
     
 def handle_yahoo(driver, query):
-    try:
-        # Maximize window to ensure elements are visible
-        
-        # Wait for page to load
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return document.readyState") == "complete"
-        )
-        log_message("Page load complete (document.readyState)")
-        
-        # 1. Handle cookie consent popup
-        consent_texts = {
-            "Dutch": "Alles accepteren",
-            "English": "Accept All"
-        }
-        
-        consent_accepted = False
-        for lang, text in consent_texts.items():
-            try:
-                accept_button = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, f"//button[contains(., '{text}')]")
-                    )
-                )
-                actions = webdriver.ActionChains(driver)
-                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
-                log_message(f"Clicked '{text}' on Yahoo consent popup ({lang})")
-                consent_accepted = True
-                time.sleep(random.uniform(2, 3))  # Wait for page to settle
-                break
-            except TimeoutException:
-                log_message(f"No '{text}' button found")
-                continue
-        
-        if not consent_accepted:
-            log_message("No known consent button found or already accepted")
+    """
+    Enhanced Yahoo search handler with smart retry logic and support for new tabs.
+    """
+    def random_sleep(min_time=0.5, max_time=1.5):
+        time.sleep(random.uniform(min_time, max_time))
 
-        # Wait again for page stability after cookie acceptance
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return document.readyState") == "complete"
-        )
-        log_message("Post-cookie page load complete")
+    def simulate_human_input(element, text):
+        """Simulate human-like typing"""
+        for char in text:
+            element.send_keys(char)
+            random_sleep(0.1, 0.3)
 
-        # 2. Perform the search
-        log_message("Attempting to locate search box")
-        
-        # Debug: Save page source and screenshot
-        with open("yahoo_page_source.html", "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-        log_message("Saved page source to 'yahoo_page_source.html'")
-        driver.save_screenshot("yahoo_page.png")
-        log_message("Saved screenshot to 'yahoo_page.png'")
+    max_attempts = 2
+    attempt = 0
 
-        # Try multiple selectors
-        selectors = [
-            (By.ID, "yschsp"),
-            (By.NAME, "p"),
-            (By.CSS_SELECTOR, "input.rapid-noclick-resp"),
-            (By.CSS_SELECTOR, "#ybar-sbq"),
-            (By.CSS_SELECTOR, "input[type='search']"),
-            (By.XPATH, "//input[@placeholder='Zoeken op het web']"),
-            (By.XPATH, "//form[@id='ybar-search-form']//input")
-        ]
-        
-        search_box = None
-        for selector_type, selector_value in selectors:
-            try:
-                log_message(f"Trying selector {selector_type}: {selector_value}")
-                search_box = WebDriverWait(driver, 3).until(
-                    EC.element_to_be_clickable((selector_type, selector_value))
-                )
-                log_message(f"Search box found with {selector_type}: {selector_value}")
-                break
-            except TimeoutException:
-                log_message(f"Selector {selector_type}: {selector_value} not found")
-                continue
-        
-        if not search_box:
-            # Last resort: JavaScript injection
-            log_message("Attempting JavaScript to find search box")
-            search_box = driver.execute_script("""
-                return document.querySelector('input[type="search"]') || 
-                       document.querySelector('input[name="p"]') || 
-                       document.querySelector('#ybar-sbq');
-            """)
-            if search_box:
-                log_message("Search box found via JavaScript")
-            else:
-                raise Exception("No search box found after all attempts")
+    while attempt < max_attempts:
+        attempt += 1
+        print(f"Attempt {attempt} of {max_attempts}")
 
-        # Input query using JavaScript to bypass interaction issues
-        log_message(f"Setting query '{query}' via JavaScript")
-        driver.execute_script("arguments[0].value = arguments[1];", search_box, query)
-        time.sleep(0.5)
-        
-        # Submit search
-        log_message("Submitting search")
         try:
-            search_box.send_keys(Keys.RETURN)
-            log_message("Submitted via RETURN key")
-        except:
-            log_message("RETURN key failed, trying button")
-            search_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']"))
+            # Randomize user agent
+            user_agents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0"
+            ]
+            driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+                "userAgent": random.choice(user_agents)
+            })
+
+            # Clear cookies and cache on retry
+            if attempt > 1:
+                driver.delete_all_cookies()
+                driver.execute_script("window.localStorage.clear();")
+                driver.execute_script("window.sessionStorage.clear();")
+                random_sleep(1, 2)
+
+            # Set timeouts
+            driver.set_page_load_timeout(20)
+            driver.set_script_timeout(15)
+
+            # Random viewport size
+            width = random.randint(1024, 1920)
+            height = random.randint(768, 1080)
+            driver.set_window_size(width, height)
+
+            # Disable webdriver flags
+            driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+                "source": """
+                    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                    window.chrome = { runtime: {} };
+                    Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+                """
+            })
+
+            # Wait for page load
+            try:
+                WebDriverWait(driver, random.uniform(5, 8)).until(
+                    lambda d: d.execute_script("return document.readyState") == "complete"
+                )
+            except TimeoutException:
+                pass
+
+            # Random scroll
+            driver.execute_script(f"window.scrollTo(0, {random.randint(50, 200)});")
+            random_sleep()
+
+            # Handle cookie consent
+            try:
+                consent_buttons = driver.execute_script("""
+                    return Array.from(document.querySelectorAll('button')).filter(btn => 
+                        ['Accept All', 'Alles accepteren'].some(text => 
+                            btn.textContent.toLowerCase().includes(text.toLowerCase())
+                        )
+                    );
+                """)
+                if consent_buttons:
+                    button = random.choice(consent_buttons)
+                    driver.execute_script("arguments[0].click();", button)
+                    random_sleep(1, 2)
+            except Exception:
+                pass
+
+            # Find search box
+            search_box = None
+            selectors = [
+                "document.querySelector('#ybar-sbq')",
+                "document.querySelector('input[name=\"p\"]')",
+                "document.querySelector('input[type=\"search\"]')",
+                "document.querySelector('form#ybar-search-form input')",
+                "document.querySelector('#header-search-input')"
+            ]
+            random.shuffle(selectors)
+            for selector in selectors:
+                search_box = driver.execute_script(f"return {selector}")
+                if search_box:
+                    break
+
+            if not search_box:
+                raise Exception("Search box not found")
+
+            # Clear and input query
+            search_box.clear()
+            random_sleep()
+            simulate_human_input(search_box, query)
+            random_sleep()
+
+            # Store current window handle before submitting the search
+            original_handle = driver.current_window_handle
+
+            # Submit search using multiple methods
+            submit_methods = [
+                lambda: search_box.send_keys(Keys.RETURN),
+                lambda: driver.execute_script("arguments[0].form.submit();", search_box),
+                lambda: driver.execute_script("""
+                    const btn = document.querySelector('button[type="submit"]');
+                    if (btn) btn.click();
+                """)
+            ]
+
+            random.shuffle(submit_methods)
+            submitted = False
+            for submit_method in submit_methods:
+                try:
+                    submit_method()
+                    submitted = True
+                    break
+                except Exception:
+                    continue
+
+            if not submitted:
+                raise Exception("Failed to submit search")
+
+            # Wait briefly to allow any new tab to open
+            time.sleep(random.uniform(1, 2))
+            # If a new tab was opened, switch to it
+            if len(driver.window_handles) > 1:
+                for handle in driver.window_handles:
+                    if handle != original_handle:
+                        driver.switch_to.window(handle)
+                        break
+
+            # Wait for results
+            WebDriverWait(driver, random.uniform(5, 8)).until(
+                lambda d: d.execute_script(
+                    "return Boolean(document.querySelector('.searchCenterMiddle, #results, .algo, #web'))"
+                )
             )
-            search_button.click()
-            log_message("Submitted via button click")
-        
-        time.sleep(random.uniform(1, 3))
-        log_message("Search executed, waiting for results")
-        return True
-        
-    except Exception as e:
-        log_message(f"Error with Yahoo search: {e}")
-        driver.save_screenshot("yahoo_error.png")
-        with open("yahoo_error_source.html", "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-        return False
+            print("Search successful!")
+            random_sleep(0.5, 1.5)
+            return True
+
+        except TimeoutException:
+            print("Yahoo search error (attempt {}): Results not found".format(attempt))
+            if os.getenv('DEBUG_YAHOO'):
+                driver.save_screenshot(f"yahoo_error_{attempt}.png")
+            if attempt >= max_attempts:
+                return False
+            print("Retrying...")
+            random_sleep(2, 3)
+        except Exception as e:
+            print(f"Yahoo search error (attempt {attempt}): {str(e)}")
+            if os.getenv('DEBUG_YAHOO'):
+                driver.save_screenshot(f"yahoo_error_{attempt}.png")
+            if attempt >= max_attempts:
+                return False
+            print("Retrying...")
+            random_sleep(2, 3)
+
+    return False
+
 
 def safe_click(driver, element, fallback_js=True):
     """Attempt to click an element safely with multiple fallback methods"""
@@ -558,7 +612,9 @@ def test_search_engine(engine, url, query, duration):
     
     # If search was successful, wait for the specified duration
     if search_success:
-        time.sleep(duration)
+        wait_time = random.uniform(3, 5)
+        time.sleep(wait_time)
+        log_message(f"Waiting {wait_time:.1f} seconds before next query...")
         
         # Log end time
         end_time = int(datetime.now().timestamp() * 1000)
@@ -578,7 +634,7 @@ def test_search_engine(engine, url, query, duration):
 
 
 
-def run_tests(engines, queries, duration, interval):
+def run_tests(engines, queries, duration):
     results = []
 
     # Shuffle both engines and queries
@@ -600,11 +656,11 @@ def run_tests(engines, queries, duration, interval):
                 log_message(f"Failed to test {engine}")
             
             # Wait before the next test
-            if engine != shuffled_engines[-1][0]:  # Skip wait after the last engine
-                wait_time = interval + random.uniform(0.5, 1.5)  # Add random component
-                log_message(f"Waiting {wait_time:.1f} seconds before next test...")
-                time.sleep(wait_time)
-        
+            # if engine != shuffled_engines[-1][0]:  # Skip wait after the last engine
+            #     wait_time = interval + random.uniform(0.5, 1.5)  # Add random component
+    log_message(f"Waiting {duration:.1f} seconds before next test...")
+    time.sleep(duration)
+    
     return results
 
 
@@ -643,8 +699,7 @@ def main():
         results = run_tests(
             engines=SEARCH_ENGINES,
             queries=SEARCH_QUERIES,
-            duration=DEFAULT_DURATION,
-            interval=TEST_INTERVAL
+            duration=DEFAULT_DURATION            # interval=TEST_INTERVAL
         )
         
         # Append an iteration number to each result for later grouping
@@ -655,8 +710,6 @@ def main():
         else:
             log_message("No results returned in this iteration.")
         
-        # Optionally, pause between iterations to let the system settle
-        time.sleep(5)
     
     # Save all results from all iterations to the same CSV file.
     save_results(all_results, OUTPUT_FILE)

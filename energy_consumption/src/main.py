@@ -13,6 +13,15 @@ def run_measurement_pipeline():
     # Ensure output directories exist
     ensure_directories_exist()
     
+    interval = 200
+    if len(sys.argv) > 1:
+        try:
+            interval = int(sys.argv[1])
+        except ValueError:
+            print(f"Invalid interval value: {sys.argv[1]}, using default 200.")
+
+    os.environ["INTERVAL"] = str(interval)
+
     # List of modules to run in order
     modules_to_run = [
         'measure',

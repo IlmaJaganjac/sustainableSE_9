@@ -77,7 +77,7 @@ def main():
     # 1) BOX PLOT FOR EDP (w=1, w=2, w=3) IN SEPARATE FIGURES
     #    Combine all iterations for each search engine 
     for w_col, w_label in zip(["EDP_w1", "EDP_w2", "EDP_w3"], ["w=1", "w=2", "w=3"]):
-        plt.figure(figsize=(8, 5))
+        plt.figure(figsize=(12, 5))
         sns.boxplot(data=df, x="Search Engine", y=w_col)
         plt.title(f"Energy Delay Product ({w_label}) per Search Engine")
         plt.ylabel("EDP")
@@ -87,7 +87,7 @@ def main():
     
     # ----------------------------------------------------------------
     # 2) VIOLIN PLOT OF TOTAL ENERGY (J) PER SEARCH ENGINE (ALL ITERATIONS COMBINED)
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(22, 5))
     sns.violinplot(data=df, x="Search Engine", y="Total Energy (J)", inner="box")
     plt.title("Total Energy (J) per Search Engine")
     plt.tight_layout()
@@ -96,7 +96,7 @@ def main():
     
     # ----------------------------------------------------------------
     # 3) VIOLIN PLOT FOR AVERAGE POWER (W) PER SEARCH ENGINE (ALL ITERATIONS COMBINED)
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(22, 5))
     sns.violinplot(data=df, x="Search Engine", y="Average Power (W)", inner="box")
     plt.title("Average Power (W) per Search Engine\n")
     plt.tight_layout()
@@ -107,9 +107,9 @@ def main():
     # 4) HISTOGRAM OF THE AVERAGE TOTAL ENERGY OVER ALL ITERATIONS PER SEARCH ENGINE
     #    We'll group by search engine, compute the mean total energy, and plot a bar chart.
     avg_energy_df = df.groupby("Search Engine", as_index=False)["Total Energy (J)"].mean()
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(14, 5))
     engines = avg_energy_df["Search Engine"].unique()
-    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8dd3c7", "#e377c2"]
+    colors = sns.color_palette("husl", len(engines))
     for engine, color in zip(engines, colors):
         engine_df = avg_energy_df[avg_energy_df["Search Engine"] == engine]
         plt.bar(engine_df["Search Engine"], engine_df["Total Energy (J)"], color=color, label=engine)
