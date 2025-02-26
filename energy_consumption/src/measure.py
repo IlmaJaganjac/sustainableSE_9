@@ -49,11 +49,11 @@ SEARCH_QUERIES = [
     "json minify"
 ]
 
-DEFAULT_DURATION = 60 #60 # Search test duration in seconds
-DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real tests)
+DEFAULT_DURATION = 1 #60 # Search test duration in seconds
+DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
 # TEST_INTERVAL = 120 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 30 #30  # Number of test iterations
+ITERATIONS = 1 #30  # Number of test iterations
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -128,9 +128,12 @@ def accept_cookie(driver, engine):
                     log_message(f"No cookie dialog for Yahoo found on attempt {attempt + 1}")
             except Exception as e:
                 log_message(f"Error accepting cookies on Yahoo on attempt {attempt + 1}: {e}")
-            # Wait a bit before retrying, unless it was the last attempt
-            if attempt < max_attempts - 1:
-                time.sleep(random.uniform(1, 2))
+                # Continue to the next attempt on error
+                continue
+            finally:
+                # Wait a bit before retrying, unless it was the last attempt
+                if attempt < max_attempts - 1:
+                    time.sleep(random.uniform(1, 2))
 
             
     elif engine == "Bing":
