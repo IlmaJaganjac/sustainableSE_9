@@ -89,11 +89,9 @@ def calculate_energy_consumption(timestamps_df, energy_df):
     for idx, row in timestamps_df.iterrows():
         engine = row["Search Engine"]
         normalized_duration = row["Normalized Duration (ms)"]
-        start_time = row["Start Time"] + normalized_duration
+        start_time = row["Start Time"] + row['Baseline Overhead (ms)'] if normalized_duration > 0 else row["Start Time"]
         end_time = row["End Time"]
         iteration = row["Iteration"]
-        print(f"start time {start_time}, normalized {normalized_duration} , end {end_time}")
-        print(f"start time original {row['Start Time']}")
         log_message(f"Processing {engine} - Iteration {iteration}: {start_time} to {end_time}")
         buffer_ms = BUFFER
         
@@ -178,7 +176,7 @@ def statistical_tests(results_df):
         all_normal = True
         for engine in results_df["Search Engine"].unique():
             values = results_df[results_df["Search Engine"] == engine][metric].dropna().values
-            print(f"{engine} - {metric}: {len(values)} values {values}") 
+            # print(f"{engine} - {metric}: {len(values)} values {values}") 
             detail = {}
             if len(values) < 3:
                 detail["initial_stat"] = None
