@@ -71,6 +71,8 @@ Throughout each iteration, **Energibridge** logs timestamps to mark the start an
 
 Finally, we employ statistical tests to measure the differences between all the engines and see if our data is valid (as in if they are normal) and if there is any statistical difference.
 
+<!-- Insert description on preliminary results and discovery of cookie/automation time and why baseline was introduced -->
+
 # Results
 
 ## Analysis
@@ -94,16 +96,28 @@ Finally, we employ statistical tests to measure the differences between all the 
 # Discussion and Future Work
 
 - **Interpretation of Results:**  
+Aggregated Metrics: When looking at the graph average power over time in seconds by the search engine (time in seconds on x-axis and power in W on the y axis) we can see that the search engines with the lowest amount of power are google, and oceanhero (around 2 to 20W). The peaks arise with yahoo, and you.com (around 40-60W compared)
+
+Cookies used by bing, google, yahoo, ecoasia (and something else) - which influences the average total energy - which causes peaks in all of the plots. (e.g., average total energy in joules on the y axis and search engine on the x-axis for a bar chart - shows peaks in bing, google, yahoo, and oceanhero). 
+
+for the box plots of energy delay product per search engine (where search engine on the x-axis and EDP on the y-axis) we see again the peaks in yahoo and google.
+
+Current reason for those signfiicant differences in yahoo and google in particular is the protection against automation. By using selenium these distort the results apparenlty on the search engines for these two - making it not a realistic perspective of the results. (Not sure why exactyly - need explanation as to why this is happening based on our methodology and process - and how this could be fixed in future work and how to interpret the results now based on this information)
+
   
 - **Limitations:**
 One of the key limitations of this study is that it only considers the client-side energy consumption, meaning the power usage of the user's device while performing search queries. However, search engines rely on extensive backend infrastructure, including data centers, caching mechanisms, and network requests, which also contribute significantly to their overall energy footprint. Since this study does not have access to backend server energy consumption data, it presents only a partial view of the environmental impact of different search engines. Future research would benefit from incorporating end-to-end energy consumption analysis, including network energy usage and server-side power draw, to provide a more holistic comparison of search engine sustainability.
 
 Another limitation is the controlled testing environment, which does not fully replicate real-world usage conditions. The experiment was conducted with a fixed set of developer-focused queries, a single test system, and under an isolated "Zen mode" to minimize background noise. However, in everyday scenarios, search engine energy consumption could be influenced by factors such as hardware variations, network conditions, browser configurations, and concurrent background processes. In addition to this, user behavior, such as scrolling through results, opening multiple tabs, or using search engine features like image or video search, could further impact power usage. These external factors may cause differences in energy efficiency that this study does not account for, limiting the generalizability of the results to a broader audience.
+
+<!-- Add potential limitations of temperature, basline method, etc. -->
   
 - **Future Research:**  
 Future research should explore a more comprehensive measurement approach that includes both client-side and server-side energy consumption. Collaborating with search engine providers or leveraging publicly available data on server energy usage could help assess the total environmental cost of search queries. Additionally, measuring the energy impact of different types of searches (e.g., text vs. image/video searches) and incorporating network-level energy consumption (such as data transfer between the user and the search engine) would provide a more complete understanding of search engine sustainability.
 
 Another promising direction for future work is expanding the scope of testing across different user conditions. This could involve testing on a range of devices (laptops, desktops, smartphones), varying internet speeds, and different browser types to analyze how search engine energy consumption changes under diverse circumstances. In addition to this, exploring how search engine settings—such as enabling dark mode, reducing JavaScript execution, or using lightweight search alternatives—impact energy efficiency could offer actionable recommendations for reducing digital carbon footprints. Lastly, with the rise of AI-powered search engines like Perplexity AI or ChatGPT-based search tools, future studies should investigate whether AI-driven search assistance consumes more or less energy compared to traditional keyword-based search engines.
+
+<!-- Add exploration in cookie investigation and how that might be unsustainable as well -->
 
 # Conclusion
 
