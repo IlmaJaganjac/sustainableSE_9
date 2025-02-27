@@ -4,6 +4,8 @@ import subprocess
 import time
 from datetime import datetime
 import pandas as pd
+import socket
+import platform
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -49,11 +51,73 @@ SEARCH_QUERIES = [
     "json minify"
 ]
 
-DEFAULT_DURATION = 1 #60 # Search test duration in seconds
-DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
+DEFAULT_DURATION =60 #60 # Search test duration in seconds
+DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real tests)
 # TEST_INTERVAL = 120 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
-ITERATIONS = 1 #30  # Number of test iterations
+ITERATIONS = 30 #30  # Number of test iterations
+
+import time
+import socket
+
+def check_internet():
+    """Returns True if internet is available, False otherwise."""
+    try:
+        socket.create_connection(("8.8.8.8", 53), timeout=5)  # Google's public DNS
+        return True
+    except OSError:
+        return False
+
+def wait_for_internet(polling_interval=10):
+    """Pauses execution and waits until an internet connection is restored."""
+    log_message("No internet connection. Pausing execution...")
+    
+    while not check_internet():
+        log_message(f"No internet detected. Retrying in {polling_interval} seconds...")
+        time.sleep(polling_interval)  # Wait before checking again
+    
+    log_message("Internet connection restored. Resuming execution...")
+
+def keep_system_awake():
+    """Simulate activity to prevent system sleep, cross-platform."""
+    try:
+        # Only perform action every 5 minutes
+        if not hasattr(keep_system_awake, 'last_time') or \
+           (time.time() - keep_system_awake.last_time) > 300:
+            system = platform.system()
+            
+            if system == "Linux":
+                # Use xdotool with proper syntax for negative coordinates
+                try:
+                    subprocess.call(['xdotool', 'mousemove_relative', '--', '1', '1'])
+                    time.sleep(0.1)  # Small delay to ensure movement registers
+                    subprocess.call(['xdotool', 'mousemove_relative', '--', '-1', '-1'])
+                    log_message("Simulated mouse movement with xdotool")
+                except FileNotFoundError:
+                    log_message("xdotool not found; skipping mouse movement")
+                except subprocess.CalledProcessError as e:
+                    log_message(f"xdotool error: {e}")
+            
+            elif system == "Windows":
+                # Use a simple PowerShell command to simulate a key press
+                try:
+                    subprocess.call(['powershell', '-Command', 'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait("{F15}")'])
+                    log_message("Simulated key press on Windows")
+                except subprocess.CalledProcessError as e:
+                    log_message(f"Windows key press simulation failed: {e}")
+            
+            elif system == "Darwin":  # macOS
+                # Use osascript to simulate a key press
+                try:
+                    subprocess.call(['osascript', '-e', 'tell application "System Events" to key code 144'])  # F15 key
+                    log_message("Simulated key press on macOS")
+                except subprocess.CalledProcessError as e:
+                    log_message(f"macOS key press simulation failed: {e}")
+            
+            keep_system_awake.last_time = time.time()
+    
+    except Exception as e:
+        log_message(f"Error in keep_system_awake: {e}")
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -111,29 +175,68 @@ def accept_cookie(driver, engine):
         max_attempts = 3
         for attempt in range(max_attempts):
             try:
-                consent_buttons = driver.execute_script("""
-                    return Array.from(document.querySelectorAll('button')).filter(btn => 
-                        ['Accept All', 'Alles accepteren'].some(text => 
-                            btn.textContent.toLowerCase().includes(text.toLowerCase())
-                        )
-                    );
-                """)
-                if consent_buttons:
-                    button = random.choice(consent_buttons)
-                    driver.execute_script("arguments[0].click();", button)
-                    log_message(f"Accepted cookies on Yahoo on attempt {attempt + 1}")
-                    time.sleep(random.uniform(1, 2))
-                    break  # Exit loop after successful click
-                else:
-                    log_message(f"No cookie dialog for Yahoo found on attempt {attempt + 1}")
-            except Exception as e:
-                log_message(f"Error accepting cookies on Yahoo on attempt {attempt + 1}: {e}")
-                # Continue to the next attempt on error
-                continue
-            finally:
-                # Wait a bit before retrying, unless it was the last attempt
+                log_message(f"Attempting to accept Yahoo cookies (Attempt {attempt + 1})")
+
+                # Check if cookie consent popup exists using WebDriverWait
+                popup_present = False
+                try:
+                    consent_button = WebDriverWait(driver, 5).until(
+                        EC.presence_of_element_located((
+                            By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(., 'Alles accepteren') or contains(., 'Accept All')]"
+                        ))
+                    )
+                    popup_present = True
+                except TimeoutException:
+                    log_message("No Yahoo cookie consent popup detected or already handled")
+                    return True  # Exit successfully if no popup is present
+
+                if popup_present:
+                    # Find and click the consent button
+                    consent_buttons = driver.execute_script("""
+                        return Array.from(document.querySelectorAll('button')).filter(btn => 
+                            ['Accept All', 'Alles accepteren'].some(text => 
+                                btn.textContent.toLowerCase().includes(text.toLowerCase())
+                            )
+                        );
+                    """)
+
+                    if consent_buttons:
+                        button = random.choice(consent_buttons)
+                        log_message("Found Yahoo cookie consent button; attempting to click")
+                        driver.execute_script("arguments[0].click();", button)
+
+                        # Wait for the popup to disappear or page to stabilize
+                        try:
+                            # Wait for the button to disappear or a page-ready state
+                            WebDriverWait(driver, 2).until_not(
+                                EC.presence_of_element_located((
+                                    By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(., 'Alles accepteren') or contains(., 'Accept All')]"
+                                ))
+                            )
+                            log_message("Yahoo cookie popup successfully closed")
+                            return True  # Exit on success
+                        except TimeoutException:
+                            log_message("Cookie popup still present after click; retrying or proceeding cautiously")
+                    else:
+                        log_message(f"No Yahoo cookie consent button found on attempt {attempt + 1}")
+
+                # Wait before retrying (only if not the last attempt)
                 if attempt < max_attempts - 1:
                     time.sleep(random.uniform(1, 2))
+                else:
+                    log_message("Max attempts reached; proceeding without accepting cookies")
+                    return False  # Indicate failure but allow script to continue
+
+            except Exception as e:
+                log_message(f"Error accepting Yahoo cookies on attempt {attempt + 1}: {e}")
+                if attempt < max_attempts - 1:
+                    time.sleep(random.uniform(1, 2))
+                else:
+                    log_message("Max attempts reached; proceeding without accepting cookies")
+                    return False
+
+        log_message("Failed to accept Yahoo cookies after all attempts")
+        return False
 
             
     elif engine == "Bing":
@@ -177,7 +280,6 @@ def accept_cookie(driver, engine):
         except TimeoutException:
             log_message(f"No cookie dialog for {engine}")
 
-
 def measure_baseline(engine, url):
     """
     Measures the baseline overhead for an engine by performing the minimal automation steps,
@@ -191,51 +293,78 @@ def measure_baseline(engine, url):
     time.sleep(random.uniform(1.5, 3.0))
     
     # Accept cookie to include its overhead in the baseline
-    accept_cookie(driver, engine)
+    if engine == "Yahoo":
+        if not accept_cookie(driver, engine):
+            log_message(f"Could not accept cookies for {engine}; proceeding without")
+            log_message("Defaulting to predefined baseline for Yahoo (21676 ms)")
+            baseline_duration = 21676
+        else:
+             # Ensure it moves forward even if cookie handling took place
+            log_message(f"Continuing with baseline measurement for {engine}")
+
+            time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
+
+            # Measure end time
+            end_time = int(datetime.now().timestamp() * 1000)
+            baseline_duration = end_time - start_time
+    else:
+        accept_cookie(driver, engine)
     
-    time.sleep(random.uniform(1, 2))
-    driver.quit()
-    end_time = int(datetime.now().timestamp() * 1000)
-    baseline_duration = end_time - start_time
+        # Ensure it moves forward even if cookie handling took place
+        log_message(f"Continuing with baseline measurement for {engine}")
+
+        time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
+
+        # Measure end time
+        end_time = int(datetime.now().timestamp() * 1000)
+        baseline_duration = end_time - start_time
+
     log_message(f"Baseline for {engine}: {baseline_duration} ms")
+    driver.quit()
     return baseline_duration
 
-def setup_driver():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    # options.add_experimental_option('prefs', {
-    #     'intl.accept_languages': 'en,en_US'
+
+def setup_driver(max_attempts=3):
+    """Setup WebDriver with retry mechanism."""
+    for attempt in range(max_attempts):
+        try:
+            options = webdriver.ChromeOptions()
+            options.add_argument("--headless")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            user_agents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+            ]
+            options.add_argument(f"user-agent={random.choice(user_agents)}")
+            options.add_argument("--disable-blink-features=AutomationControlled")
+            options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            
+            driver = webdriver.Chrome(options=options)
+            driver.set_page_load_timeout(300)
+            driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+                "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+            })
+            return driver
+        except WebDriverException as e:
+            log_message(f"WebDriver setup failed (attempt {attempt+1}/{max_attempts}): {e}")
+            if attempt < max_attempts - 1:
+                time.sleep(10)
+    return None
+    # # Create driver
+    # driver = webdriver.Chrome(options=options)
+    # driver.set_page_load_timeout(300) 
+    # # Execute CDP commands to prevent detection
+    # driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+    #     "source": """
+    #     Object.defineProperty(navigator, 'webdriver', {
+    #         get: () => undefined
+    #     })
+    #     """
     # })
     
-    # # Try to force Google to use English
-    # options.add_argument('--accept-language=en-US,en;q=0.9')
-    
-    # Add user agent to appear more like a regular browser
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36"
-    ]
-    options.add_argument(f"user-agent={random.choice(user_agents)}")
-    
-    # Disable automation flags
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
-    
-    # Create driver
-    driver = webdriver.Chrome(options=options)
-    
-    # Execute CDP commands to prevent detection
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        "source": """
-        Object.defineProperty(navigator, 'webdriver', {
-            get: () => undefined
-        })
-        """
-    })
-    
-    return driver
+    # return driver
 
 def handle_google(driver, query):
     try:
@@ -654,13 +783,18 @@ def handle_default_search(driver, query):
     
 def test_search_engine(engine, url, query, duration, baseline_overheads):
     log_message(f"Testing {engine}")
-
+   
     # Log start time
     start_time = int(datetime.now().timestamp() * 1000)  # Convert to milliseconds
 
     # Set up WebDriver with anti-detection measures
     driver = setup_driver()
     
+    if driver is None:  # If WebDriver failed to launch
+        log_message(f"Skipping {engine} due to WebDriver error.")
+        return None
+    
+
     # Add a small random delay to appear more human-like
     time.sleep(random.uniform(0.5, 1.5))
     
@@ -674,20 +808,16 @@ def test_search_engine(engine, url, query, duration, baseline_overheads):
     search_success = False
     
     # Use engine-specific handlers
-    if engine == "Google":
-        search_success = handle_google(driver, query)
-    elif engine == "Yahoo":
-        search_success = handle_yahoo(driver, query)
-    elif engine == "Bing":
-        search_success = handle_bing(driver, query)
-    elif engine == "DuckDuckGo":
-        search_success = handle_duckduckgo(driver, query)
-    elif engine == "Ecosia":
-        search_success = handle_ecosia(driver, query)
-    elif engine == "Startpage":
-        search_success = handle_startpage(driver, query)
-    else:
-        search_success = handle_default_search(driver, query)
+    handlers = {
+        "Google": handle_google,
+        "Yahoo": handle_yahoo,
+        "Bing": handle_bing,
+        "DuckDuckGo": handle_duckduckgo,
+        "Ecosia": handle_ecosia,
+        "Startpage": handle_startpage
+    }
+    
+    search_success = handlers.get(engine, handle_default_search)(driver, query)
     
     # If search was successful, wait for the specified duration
     if search_success:
@@ -698,6 +828,11 @@ def test_search_engine(engine, url, query, duration, baseline_overheads):
         # Log end time
         end_time = int(datetime.now().timestamp() * 1000)
         
+        wait_for_internet()
+        # log_message(f"Internet available")
+
+        keep_system_awake()
+        # log_message(f"System awake and internet available")
         # Clean up
         driver.quit()
         
@@ -777,6 +912,7 @@ def main():
     baseline_overheads = {}
     for engine, url in SEARCH_ENGINES.items():
         baseline_overheads[engine] = measure_baseline(engine, url)
+    # baseline_overheads = {engine: 0 for engine in SEARCH_ENGINES.keys()}
     
     log_message(f"Baseline overheads: {baseline_overheads}")
 
