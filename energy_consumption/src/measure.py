@@ -35,20 +35,20 @@ SEARCH_ENGINES = {
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    "react setstate sub property",
-    "bootstrap button next to input",
-    "forcelayout api",
-    "golang copy built in",
-    "strlen",
-    "java comparator interface",
-    "ubuntu search packages",
-    "URI uri = new URIBuilder",
-    "java throw exception example",
-    "mdn transform origin",
-    "segmented circle css",
-    "show is not a member of org.apache.spark.sql.GroupedData",
-    "babel-jest can't console log in babel jest",
-    "json minify"
+    # "react setstate sub property",
+    # "bootstrap button next to input",
+    # "forcelayout api",
+    # "golang copy built in",
+    # "strlen",
+    # "java comparator interface",
+    # "ubuntu search packages",
+    # "URI uri = new URIBuilder",
+    # "java throw exception example",
+    # "mdn transform origin",
+    # "segmented circle css",
+    # "show is not a member of org.apache.spark.sql.GroupedData",
+    # "babel-jest can't console log in babel jest",
+    # "json minify"
 ]
 
 DEFAULT_DURATION =60 #60 # Search test duration in seconds

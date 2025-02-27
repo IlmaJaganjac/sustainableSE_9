@@ -50,35 +50,62 @@ def compute_energy_for_interval(subframe, key="PACKAGE_ENERGY (W)"):
             key = "SYSTEM_POWER (Watts)"
     data = subframe[key].copy().to_list()
 
+    # Add "Power (W)" column if it doesn't exist yet
+    if "Power (W)" not in subframe.columns:
+        subframe = subframe.copy()
+        subframe["Power (W)"] = 0.0
+
     if key != "CPU_POWER (Watts)" and key != "SYSTEM_POWER (Watts)":
         subframe = subframe.copy()
         subframe.loc[:, key + "_original"] = subframe[key].copy()
 
-
         for i in range(1, len(subframe)):
             # Power is delta energy / delta time
             delta_e = subframe[key].iloc[i] - subframe[key].iloc[i - 1]
-            delta_t = subframe["Delta"].iloc[i]
+            delta_t = subframe["Delta"].iloc[i] if "Delta" in subframe.columns else 0
             if not np.isnan(delta_t) and delta_t > 0:
                 subframe.loc[subframe.index[i], "Power (W)"] = (delta_e * 1000) / delta_t
             else:
                 subframe.loc[subframe.index[i], "Power (W)"] = 0
-
+    
+    # If SYSTEM_POWER is already in Watts, use it directly
     if key == "SYSTEM_POWER (Watts)":
-        all_temps = subframe[['CPU_TEMP_0','CPU_TEMP_1','CPU_TEMP_2','CPU_TEMP_3',
-                           'CPU_TEMP_4','CPU_TEMP_5','CPU_TEMP_6','CPU_TEMP_7',
-                           'CPU_TEMP_8','CPU_TEMP_9']]
-        avg_temp = all_temps.mean(axis=0).mean()
+        # Copy SYSTEM_POWER values to Power (W) column if not already done
+        subframe["Power (W)"] = subframe[key]
+        
+        # Calculate average temperature if temperature columns exist
+        temp_cols = [col for col in subframe.columns if 'CPU_TEMP' in col]
+        if temp_cols:
+            all_temps = subframe[temp_cols]
+            avg_temp = all_temps.mean(axis=0).mean()
 
         times_s = subframe["Time"].values / 1000.0
-        total_energy = np.trapz(data, times_s)  if len(times_s) > 1 else 0.0
-    if key == "PACKAGE_ENERGY (J)":
+        # Use trapezoid as trapz is deprecated
+        try:
+            from scipy.integrate import trapezoid
+            total_energy = trapezoid(data, times_s) if len(times_s) > 1 else 0.0
+        except ImportError:
+            import numpy as np
+            total_energy = np.trapz(data, times_s) if len(times_s) > 1 else 0.0
+    elif key == "PACKAGE_ENERGY (J)":
         total_energy = subframe[key].iloc[-1] - subframe[key].iloc[0]
+    else:
+        # Fallback calculation if neither of the above applies
+        times_s = subframe["Time"].values / 1000.0
+        try:
+            from scipy.integrate import trapezoid
+            total_energy = trapezoid(data, times_s) if len(times_s) > 1 else 0.0
+        except ImportError:
+            import numpy as np
+            total_energy = np.trapz(data, times_s) if len(times_s) > 1 else 0.0
+        
     print(f"Total energy: {total_energy}")
-    avg_power = subframe["Power (W)"].mean()
+    
+    # Safely calculate average power
+    avg_power = subframe["Power (W)"].mean() if not subframe["Power (W)"].empty else 0.0
     print(f"Average power: {avg_power}") 
-    if key == "SYSTEM_POWER (Watts)":
-        return total_energy, avg_power, avg_temp, data
+    
+    # ALWAYS return the subframe as the last parameter, not the data list
     return total_energy, avg_power, avg_temp, subframe
 
 def calculate_energy_consumption(timestamps_df, energy_df):
@@ -105,15 +132,12 @@ def calculate_energy_consumption(timestamps_df, energy_df):
                    "Total Energy (J)": 0, "Average Power (W)": 0, "Duration (s)": 0,
                    "Energy Delay Product": 0
                    }
+            results.append(res)
         else:
-            energy_val, avg_power, avg_temp, sample_data = compute_energy_for_interval(iter_df)
+            energy_val, avg_power, avg_temp, sample_data_df = compute_energy_for_interval(iter_df)
             duration_s = (end_time - start_time) / 1000.0
             
-            # edp = energy_val * (duration_s ** w)
-            # the exponent w denotes weights, and it can take the following values:
-            #  1 for energy efficiency when energy is of major concern;
-            #  2 for balanced, when both energy consumption and performance are important;
-            #  3 for performance efficiency,
+            # Calculate Energy Delay Product with different weights
             edp1, edp2, edp3 = (energy_val * duration_s ** w for w in W)
 
             res = {"Search Engine": engine, "Iteration": iteration,
@@ -123,28 +147,29 @@ def calculate_energy_consumption(timestamps_df, energy_df):
                    "Energy Delay Product": [edp1, edp2, edp3],
                    "Temperature": avg_temp
                    }
+            results.append(res)
 
-        for i, r in sample_data.iterrows():
-                    sample_row = {
-                        "Search Engine": engine,
-                        "Iteration": iteration,
-                        "Time": r["Time"],             
-                        "Start_Time": start_time,      
-                        "Power (W)": r.get("Power (W)", None),
-                    }
-                    # If CPU usage, memory, or temperature columns exist, add them
-                    if "CPU_USAGE" in r:
-                        sample_row["CPU_USAGE"] = r["CPU_USAGE"]
-                    for col in r.index:
-                        if "CPU_TEMP" in col:
-                            sample_row[col] = r[col]
-                    if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
-                        sample_row["USED_MEMORY"] = r["USED_MEMORY"]
-                        sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
-                    
-                    sample_rows.append(sample_row)
+            # Now process the sample data DataFrame
+            for i, r in sample_data_df.iterrows():
+                sample_row = {
+                    "Search Engine": engine,
+                    "Iteration": iteration,
+                    "Time": r["Time"],             
+                    "Start_Time": start_time,      
+                    "Power (W)": r.get("Power (W)", None),
+                }
+                # If CPU usage, memory, or temperature columns exist, add them
+                if "CPU_USAGE" in r:
+                    sample_row["CPU_USAGE"] = r["CPU_USAGE"]
+                for col in r.index:
+                    if "CPU_TEMP" in col:
+                        sample_row[col] = r[col]
+                if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
+                    sample_row["USED_MEMORY"] = r["USED_MEMORY"]
+                    sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
+                
+                sample_rows.append(sample_row)
     
-        results.append(res)
     iter_results_df = pd.DataFrame(results)
     sample_results_df = pd.DataFrame(sample_rows)
     
