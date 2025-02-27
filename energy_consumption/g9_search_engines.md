@@ -96,14 +96,14 @@ Finally, we employ statistical tests to measure the differences between all the 
 - **Interpretation of Results:**  
   
 - **Limitations:**
-  - Client-Side Focus:
-    We are limited to measuring energy consumption only on the client side. Without access to the search engines’ backend servers, we cannot account for the energy used during data processing, network transmission, and server operations. Consequently, our results reflect only a portion of the overall energy footprint of a search query.
-  - Controlled Environment vs. Real-World Conditions:
-Although we have implemented measures such as "Zen mode" and system warm-ups to reduce variability, our controlled testing environment does not perfectly replicate real-world user conditions. Variations in device hardware, background processes, and network conditions in everyday usage may lead to differences in energy consumption that our experiment does not capture, limiting the external validity of our findings.
+One of the key limitations of this study is that it only considers the client-side energy consumption, meaning the power usage of the user's device while performing search queries. However, search engines rely on extensive backend infrastructure, including data centers, caching mechanisms, and network requests, which also contribute significantly to their overall energy footprint. Since this study does not have access to backend server energy consumption data, it presents only a partial view of the environmental impact of different search engines. Future research would benefit from incorporating end-to-end energy consumption analysis, including network energy usage and server-side power draw, to provide a more holistic comparison of search engine sustainability.
+
+Another limitation is the controlled testing environment, which does not fully replicate real-world usage conditions. The experiment was conducted with a fixed set of developer-focused queries, a single test system, and under an isolated "Zen mode" to minimize background noise. However, in everyday scenarios, search engine energy consumption could be influenced by factors such as hardware variations, network conditions, browser configurations, and concurrent background processes. In addition to this, user behavior, such as scrolling through results, opening multiple tabs, or using search engine features like image or video search, could further impact power usage. These external factors may cause differences in energy efficiency that this study does not account for, limiting the generalizability of the results to a broader audience.
   
 - **Future Research:**  
-  - 
-  - 
+Future research should explore a more comprehensive measurement approach that includes both client-side and server-side energy consumption. Collaborating with search engine providers or leveraging publicly available data on server energy usage could help assess the total environmental cost of search queries. Additionally, measuring the energy impact of different types of searches (e.g., text vs. image/video searches) and incorporating network-level energy consumption (such as data transfer between the user and the search engine) would provide a more complete understanding of search engine sustainability.
+
+Another promising direction for future work is expanding the scope of testing across different user conditions. This could involve testing on a range of devices (laptops, desktops, smartphones), varying internet speeds, and different browser types to analyze how search engine energy consumption changes under diverse circumstances. In addition to this, exploring how search engine settings—such as enabling dark mode, reducing JavaScript execution, or using lightweight search alternatives—impact energy efficiency could offer actionable recommendations for reducing digital carbon footprints. Lastly, with the rise of AI-powered search engines like Perplexity AI or ChatGPT-based search tools, future studies should investigate whether AI-driven search assistance consumes more or less energy compared to traditional keyword-based search engines.
 
 # Conclusion
 
