@@ -96,13 +96,6 @@ Finally, we employ statistical tests to measure the differences between all the 
 # Discussion and Future Work
 
 - **Interpretation of Results:**  
-Aggregated Metrics: When looking at the graph average power over time in seconds by the search engine (time in seconds on x-axis and power in W on the y axis) we can see that the search engines with the lowest amount of power are google, and oceanhero (around 2 to 20W). The peaks arise with yahoo, and you.com (around 40-60W compared)
-
-Cookies used by bing, google, yahoo, ecoasia (and something else) - which influences the average total energy - which causes peaks in all of the plots. (e.g., average total energy in joules on the y axis and search engine on the x-axis for a bar chart - shows peaks in bing, google, yahoo, and oceanhero). 
-
-for the box plots of energy delay product per search engine (where search engine on the x-axis and EDP on the y-axis) we see again the peaks in yahoo and google.
-
-Current reason for those signfiicant differences in yahoo and google in particular is the protection against automation. By using selenium these distort the results apparenlty on the search engines for these two - making it not a realistic perspective of the results. (Not sure why exactyly - need explanation as to why this is happening based on our methodology and process - and how this could be fixed in future work and how to interpret the results now based on this information)
 
   
 - **Limitations:**
