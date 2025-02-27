@@ -93,7 +93,7 @@ def calculate_energy_consumption(timestamps_df, energy_df):
         engine = row["Search Engine"]
         normalized_duration = row["Normalized Duration (ms)"]
         # if query took 2 seconds more than the baseline remove this overhead probably due to selenium.
-        start_time = row["Start Time"] + row['Baseline Overhead (ms)'] if normalized_duration > 2000 else row["Start Time"]
+        start_time = row["Start Time"] + row['Baseline Overhead (ms)'] if normalized_duration > 1000 else row["Start Time"] 
         end_time = row["End Time"]
         iteration = row["Iteration"]
         log_message(f"Processing {engine} - Iteration {iteration}: {start_time} to {end_time}")

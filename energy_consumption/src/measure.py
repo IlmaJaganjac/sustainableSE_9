@@ -6,7 +6,6 @@ from datetime import datetime
 import pandas as pd
 import socket
 import platform
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -15,8 +14,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import (
     NoSuchElementException, TimeoutException, WebDriverException,
     ElementClickInterceptedException)
-import logging
 
+from selenium.webdriver.common.action_chains import ActionChains
+import logging
 # Search Engines
 SEARCH_ENGINES = {
     "Google": "https://www.google.com", 
@@ -35,27 +35,30 @@ SEARCH_ENGINES = {
 
 SEARCH_QUERIES = [
     "angular route uib tab",
-    "react setstate sub property",
-    "bootstrap button next to input",
-    "forcelayout api",
-    "golang copy built in",
-    "strlen",
-    "java comparator interface",
-    "ubuntu search packages",
-    "URI uri = new URIBuilder",
-    "java throw exception example",
-    "mdn transform origin",
-    "segmented circle css",
-    "show is not a member of org.apache.spark.sql.GroupedData",
-    "babel-jest can't console log in babel jest",
-    "json minify"
+    # "react setstate sub property",
+    # "bootstrap button next to input",
+    # "forcelayout api",
+    # "golang copy built in",
+    # "strlen",
+    # "java comparator interface",
+    # "ubuntu search packages",
+    # "URI uri = new URIBuilder",
+    # "java throw exception example",
+    # "mdn transform origin",
+    # "segmented circle css",
+    # "show is not a member of org.apache.spark.sql.GroupedData",
+    # "babel-jest can't console log in babel jest",
+    # "json minify"
 ]
 
-DEFAULT_DURATION =60 #60 # Search test duration in seconds
-DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real tests)
+DEFAULT_DURATION = 60 #60 # Search test duration in seconds
+DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
 # TEST_INTERVAL = 120 #120  # Pause between tests in seconds
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
 ITERATIONS = 30 #30  # Number of test iterations
+
+baseline_df = pd.read_csv("baseline_average.csv")
+BASE_LINE_OVERHEAD = baseline_df.set_index("Search Engine")["Baseline Duration (ms)"].to_dict()
 
 import time
 import socket
@@ -136,196 +139,12 @@ def warm_up(duration=DEFAULT_WARMUP):
     log_message("Warm-up complete.")
 
 
-def accept_cookie(driver, engine):
-    """
-    Handles cookie consent for the given search engine.
-    This ensures the baseline includes the cookie acceptance overhead.
-    """
-    if engine == "Google":
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.frame_to_be_available_and_switch_to_it(
-                    (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
-                )
-            )
-            log_message("Switched to Google consent iframe")
-        except TimeoutException:
-            log_message("No Google consent iframe found or already handled")
-        consent_texts = {
-            "English": "Accept All",
-            "Dutch": "Alles accepteren"
-        }
-        for lang, text in consent_texts.items():
-            try:
-                accept_button = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
-                    )
-                )
-                actions = webdriver.ActionChains(driver)
-                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
-                log_message(f"Clicked consent button in {lang} ('{text}')")
-                time.sleep(random.uniform(1, 2))
-                break
-            except TimeoutException:
-                continue
-        driver.switch_to.default_content()
-        
-    elif engine == "Yahoo":
-        max_attempts = 3
-        for attempt in range(max_attempts):
-            try:
-                log_message(f"Attempting to accept Yahoo cookies (Attempt {attempt + 1})")
 
-                # Check if cookie consent popup exists using WebDriverWait
-                popup_present = False
-                try:
-                    consent_button = WebDriverWait(driver, 5).until(
-                        EC.presence_of_element_located((
-                            By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(., 'Alles accepteren') or contains(., 'Accept All')]"
-                        ))
-                    )
-                    popup_present = True
-                except TimeoutException:
-                    log_message("No Yahoo cookie consent popup detected or already handled")
-                    return True  # Exit successfully if no popup is present
-
-                if popup_present:
-                    # Find and click the consent button
-                    consent_buttons = driver.execute_script("""
-                        return Array.from(document.querySelectorAll('button')).filter(btn => 
-                            ['Accept All', 'Alles accepteren'].some(text => 
-                                btn.textContent.toLowerCase().includes(text.toLowerCase())
-                            )
-                        );
-                    """)
-
-                    if consent_buttons:
-                        button = random.choice(consent_buttons)
-                        log_message("Found Yahoo cookie consent button; attempting to click")
-                        driver.execute_script("arguments[0].click();", button)
-
-                        # Wait for the popup to disappear or page to stabilize
-                        try:
-                            # Wait for the button to disappear or a page-ready state
-                            WebDriverWait(driver, 2).until_not(
-                                EC.presence_of_element_located((
-                                    By.XPATH, "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or contains(., 'Alles accepteren') or contains(., 'Accept All')]"
-                                ))
-                            )
-                            log_message("Yahoo cookie popup successfully closed")
-                            return True  # Exit on success
-                        except TimeoutException:
-                            log_message("Cookie popup still present after click; retrying or proceeding cautiously")
-                    else:
-                        log_message(f"No Yahoo cookie consent button found on attempt {attempt + 1}")
-
-                # Wait before retrying (only if not the last attempt)
-                if attempt < max_attempts - 1:
-                    time.sleep(random.uniform(1, 2))
-                else:
-                    log_message("Max attempts reached; proceeding without accepting cookies")
-                    return False  # Indicate failure but allow script to continue
-
-            except Exception as e:
-                log_message(f"Error accepting Yahoo cookies on attempt {attempt + 1}: {e}")
-                if attempt < max_attempts - 1:
-                    time.sleep(random.uniform(1, 2))
-                else:
-                    log_message("Max attempts reached; proceeding without accepting cookies")
-                    return False
-
-        log_message("Failed to accept Yahoo cookies after all attempts")
-        return False
-
-            
-    elif engine == "Bing":
-        try:
-            cookie_button = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.ID, "bnp_btn_accept"))
-            )
-            if safe_click(driver, cookie_button):
-                log_message("Accepted cookies on Bing")
-                time.sleep(1)
-        except TimeoutException:
-            log_message("No cookie dialog for Bing")
-            
-    elif engine == "Ecosia":
-        try:
-            cookie_accept = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Accept all')]"))
-            )
-            cookie_accept.click()
-            log_message("Accepted cookies on Ecosia")
-            time.sleep(1)
-        except TimeoutException:
-            log_message("No cookie dialog on Ecosia or already accepted")
-    
-    engines_without_consent = {
-        "DuckDuckGo", "Brave Search", "OceanHero", "Startpage", "Qwant", "Swisscows", "Mojeek", "You.com"
-    }
-    if engine in engines_without_consent:
-        log_message(f"{engine} does not require cookie consent.")
-    else:
-        # Fallback: attempt a generic acceptance
-        try:
-            consent_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept')]")
-                )
-            )
-            consent_button.click()
-            log_message(f"Accepted cookies on {engine} using fallback method")
-            time.sleep(random.uniform(1, 2))
-        except TimeoutException:
-            log_message(f"No cookie dialog for {engine}")
-
-def measure_baseline(engine, url):
-    """
-    Measures the baseline overhead for an engine by performing the minimal automation steps,
-    including accepting cookies.
-    """
-    log_message(f"Measuring baseline for {engine}")
-    start_time = int(datetime.now().timestamp() * 1000)  # in ms
-    driver = setup_driver()
-    time.sleep(random.uniform(0.5, 1.5))
-    driver.get(url)
-    time.sleep(random.uniform(1.5, 3.0))
-    
-    # Accept cookie to include its overhead in the baseline
-    if engine == "Yahoo":
-        if not accept_cookie(driver, engine):
-            log_message(f"Could not accept cookies for {engine}; proceeding without")
-            log_message("Defaulting to predefined baseline for Yahoo (21676 ms)")
-            baseline_duration = 21676
-        else:
-             # Ensure it moves forward even if cookie handling took place
-            log_message(f"Continuing with baseline measurement for {engine}")
-
-            time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
-
-            # Measure end time
-            end_time = int(datetime.now().timestamp() * 1000)
-            baseline_duration = end_time - start_time
-    else:
-        accept_cookie(driver, engine)
-    
-        # Ensure it moves forward even if cookie handling took place
-        log_message(f"Continuing with baseline measurement for {engine}")
-
-        time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
-
-        # Measure end time
-        end_time = int(datetime.now().timestamp() * 1000)
-        baseline_duration = end_time - start_time
-
-    log_message(f"Baseline for {engine}: {baseline_duration} ms")
-    driver.quit()
-    return baseline_duration
 
 
 def setup_driver(max_attempts=3):
     """Setup WebDriver with retry mechanism."""
+    wait_for_internet()
     for attempt in range(max_attempts):
         try:
             options = webdriver.ChromeOptions()
@@ -368,83 +187,128 @@ def setup_driver(max_attempts=3):
 
 def handle_google(driver, query):
     try:
-        # Maximize window to ensure elements are visible
-        driver.maximize_window()
-        
-        # 1. Switch to the consent iframe if present
+        # Avoid maximizing window unless necessary (most modern sites don’t need it)
+        # driver.maximize_window()
+
+        # 1. Handle consent dialog efficiently
+        consent_button_xpath = "//*[text()[normalize-space()='Accept All'] or text()[normalize_space()='Alles accepteren']]"
         try:
-            WebDriverWait(driver, 10).until(
+            # Check for iframe briefly (reduced from 10s to 3s)
+            WebDriverWait(driver, 3).until(
                 EC.frame_to_be_available_and_switch_to_it(
                     (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
                 )
             )
-            log_message("Switched to Google consent iframe")
-        except TimeoutException:
-            log_message("No Google consent iframe found or already handled")
+            accept_button = WebDriverWait(driver, 2).until(
+                EC.element_to_be_clickable((By.XPATH, consent_button_xpath))
+            )
+            driver.execute_script("arguments[0].click();", accept_button)  # Faster JS click
+            driver.switch_to.default_content()  # Switch back immediately
+            time.sleep(0.5)  # Minimal delay after consent
+        except:
+            # No consent iframe or already handled; proceed
+            driver.switch_to.default_content()
 
-        # 2. Handle consent button with multi-language support
-        consent_texts = {
-            "English": "Accept All",
-            "Dutch": "Alles accepteren"
-            # Add more languages if needed, e.g.:
-            # "German": "Alle akzeptieren",
-
-        }
-        
-        consent_accepted = False
-        for lang, text in consent_texts.items():
-            try:
-                accept_button = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
-                    )
-                )
-                # Use ActionChains for human-like click
-                actions = webdriver.ActionChains(driver)
-                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
-                log_message(f"Clicked consent button in {lang} ('{text}')")
-                consent_accepted = True
-                time.sleep(random.uniform(1, 2))
-                break
-            except TimeoutException:
-                continue
-        
-        if not consent_accepted:
-            log_message("Could not find any known consent button text")
-        
-        # Always switch back to main content
-        driver.switch_to.default_content()
-
-        # 3. Perform the search
-        search_box = WebDriverWait(driver, 15).until(
+        # 2. Perform the search
+        search_box = WebDriverWait(driver, 5).until(
             EC.element_to_be_clickable((By.NAME, "q"))
         )
         
-        # Clear and input query with human-like typing
+        # Send query all at once instead of character-by-character
         search_box.clear()
-        actions = webdriver.ActionChains(driver)
-        actions.move_to_element(search_box).click()
-        for char in query:
-            actions.send_keys(char).pause(random.uniform(0.1, 0.3))
-        actions.perform()
+        search_box.send_keys(query)
         
-        # Submit search with random delay
-        time.sleep(random.uniform(0.5, 1.5))
-        try:
-            search_box.send_keys(Keys.RETURN)
-        except:
-            # Fallback to clicking search button
-            search_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.NAME, "btnK"))
-            )
-            actions.move_to_element(search_button).pause(random.uniform(0.5, 1)).click().perform()
+        # Submit immediately with Enter key (no random delay)
+        search_box.send_keys(Keys.RETURN)
         
-        time.sleep(random.uniform(1, 3))  # Wait for results
+        # Minimal wait for results (adjust based on your needs)
+        time.sleep(1)
         return True
         
     except Exception as e:
         log_message(f"Error with Google search: {e}")
         return False
+
+
+# def handle_google(driver, query):
+#     try:
+#         # Maximize window to ensure elements are visible
+#         driver.maximize_window()
+        
+#         # 1. Switch to the consent iframe if present
+#         try:
+#             WebDriverWait(driver, 10).until(
+#                 EC.frame_to_be_available_and_switch_to_it(
+#                     (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
+#                 )
+#             )
+#             log_message("Switched to Google consent iframe")
+#         except TimeoutException:
+#             log_message("No Google consent iframe found or already handled")
+
+#         # 2. Handle consent button with multi-language support
+#         consent_texts = {
+#             "English": "Accept All",
+#             "Dutch": "Alles accepteren"
+#             # Add more languages if needed, e.g.:
+#             # "German": "Alle akzeptieren",
+
+#         }
+        
+#         consent_accepted = False
+#         for lang, text in consent_texts.items():
+#             try:
+#                 accept_button = WebDriverWait(driver, 5).until(
+#                     EC.element_to_be_clickable(
+#                         (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
+#                     )
+#                 )
+#                 # Use ActionChains for human-like click
+#                 actions = webdriver.ActionChains(driver)
+#                 actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
+#                 log_message(f"Clicked consent button in {lang} ('{text}')")
+#                 consent_accepted = True
+#                 time.sleep(random.uniform(1, 2))
+#                 break
+#             except TimeoutException:
+#                 continue
+        
+#         if not consent_accepted:
+#             log_message("Could not find any known consent button text")
+        
+#         # Always switch back to main content
+#         driver.switch_to.default_content()
+
+#         # 3. Perform the search
+#         search_box = WebDriverWait(driver, 15).until(
+#             EC.element_to_be_clickable((By.NAME, "q"))
+#         )
+        
+#         # Clear and input query with human-like typing
+#         search_box.clear()
+#         actions = webdriver.ActionChains(driver)
+#         actions.move_to_element(search_box).click()
+#         for char in query:
+#             actions.send_keys(char).pause(random.uniform(0.1, 0.3))
+#         actions.perform()
+        
+#         # Submit search with random delay
+#         time.sleep(random.uniform(0.5, 1.5))
+#         try:
+#             search_box.send_keys(Keys.RETURN)
+#         except:
+#             # Fallback to clicking search button
+#             search_button = WebDriverWait(driver, 5).until(
+#                 EC.element_to_be_clickable((By.NAME, "btnK"))
+#             )
+#             actions.move_to_element(search_button).pause(random.uniform(0.5, 1)).click().perform()
+        
+#         time.sleep(random.uniform(1, 3))  # Wait for results
+#         return True
+        
+#     except Exception as e:
+#         log_message(f"Error with Google search: {e}")
+#         return False
     
 def handle_yahoo(driver, query):
     """
@@ -781,28 +645,51 @@ def handle_default_search(driver, query):
         log_message(f"Error with search: {e}")
         return False
     
-def test_search_engine(engine, url, query, duration, baseline_overheads):
+
+class DriverManager:
+    _driver = None
+
+    @classmethod
+    def get_driver(cls):
+        if cls._driver is None:
+            log_message("Initializing persistent Selenium driver...")
+            cls._driver = setup_driver()
+            if cls._driver is None:
+                raise Exception("Failed to initialize the Selenium driver.")
+            log_message("Persistent driver initialized.")
+        return cls._driver
+
+    @classmethod
+    def quit_driver(cls):
+        if cls._driver is not None:
+            log_message("Quitting persistent driver...")
+            cls._driver.quit()
+            cls._driver = None
+            log_message("Driver closed.")
+
+
+def test_search_engine(engine, url, query, duration, baseline_overheads, driver):
     log_message(f"Testing {engine}")
    
     # Log start time
     start_time = int(datetime.now().timestamp() * 1000)  # Convert to milliseconds
 
     # Set up WebDriver with anti-detection measures
-    driver = setup_driver()
+    driver.get(url)
     
-    if driver is None:  # If WebDriver failed to launch
-        log_message(f"Skipping {engine} due to WebDriver error.")
-        return None
+    # if driver is None:  # If WebDriver failed to launch
+    #     log_message(f"Skipping {engine} due to WebDriver error.")
+    #     return None
     
 
     # Add a small random delay to appear more human-like
     time.sleep(random.uniform(0.5, 1.5))
     
-    # Open the search engine
-    driver.get(url)
+    # # Open the search engine
+    # driver.get(url)
     
     # Add a random delay for page load
-    time.sleep(random.uniform(1.5, 3.0))
+    # time.sleep(random.uniform(1.5, 3.0))
     
     # Initialize success flag
     search_success = False
@@ -821,9 +708,10 @@ def test_search_engine(engine, url, query, duration, baseline_overheads):
     
     # If search was successful, wait for the specified duration
     if search_success:
-        wait_time = random.uniform(1, 1.5)
-        time.sleep(wait_time)
+        wait_time = random.uniform(1, duration)
+        wait_time = 20
         log_message(f"Waiting {wait_time:.1f} seconds before next query...")
+        time.sleep(wait_time)
         
         # Log end time
         end_time = int(datetime.now().timestamp() * 1000)
@@ -834,7 +722,7 @@ def test_search_engine(engine, url, query, duration, baseline_overheads):
         keep_system_awake()
         # log_message(f"System awake and internet available")
         # Clean up
-        driver.quit()
+        driver.delete_all_cookies()
         
         raw_duration = end_time - start_time
         baseline = baseline_overheads.get(engine, 0)
@@ -850,11 +738,11 @@ def test_search_engine(engine, url, query, duration, baseline_overheads):
         }
     else:
         log_message(f"Search failed for {engine}")
-        driver.quit()
+        driver.delete_all_cookies()
         return None
 
 
-def run_tests(engines, queries, duration, baseline_overheads):
+def run_tests(engines, queries, duration, baseline_overheads, driver):
     results = []
 
     # Shuffle both engines and queries
@@ -866,7 +754,7 @@ def run_tests(engines, queries, duration, baseline_overheads):
         log_message(f"Testing query: {query}")
         for engine, url in shuffled_engines:
             # Test the search engine
-            result = test_search_engine(engine, url, query, duration, baseline_overheads)
+            result = test_search_engine(engine, url, query, duration, baseline_overheads, driver)
             if result:
                 results.append(result)
                 log_message(f"Successfully tested {engine}")
@@ -909,12 +797,13 @@ def main():
 
     # Perform system warm-up
     warm_up()
-    baseline_overheads = {}
-    for engine, url in SEARCH_ENGINES.items():
-        baseline_overheads[engine] = measure_baseline(engine, url)
-    # baseline_overheads = {engine: 0 for engine in SEARCH_ENGINES.keys()}
+    # baseline_overheads = {}
+    # for engine, url in SEARCH_ENGINES.items():
+    #     baseline_overheads[engine] = measure_baseline(engine, url)
+    print(BASE_LINE_OVERHEAD)
     
-    log_message(f"Baseline overheads: {baseline_overheads}")
+    log_message(f"Baseline overheads: {BASE_LINE_OVERHEAD}")
+    driver = DriverManager.get_driver()
 
     for i in range(ITERATIONS):
         log_message(f"--- Iteration {i + 1} of {ITERATIONS} ---")
@@ -923,7 +812,8 @@ def main():
             engines=SEARCH_ENGINES,
             queries=SEARCH_QUERIES,
             duration=DEFAULT_DURATION,
-            baseline_overheads=baseline_overheads
+            baseline_overheads=BASE_LINE_OVERHEAD,
+            driver=driver
         )
         
         # Append an iteration number to each result for later grouping
@@ -938,6 +828,7 @@ def main():
     # Save all results from all iterations to the same CSV file.
     save_results(all_results, OUTPUT_FILE)
     log_message("Measurement complete!")
+    DriverManager.quit_driver()
 
 if __name__ == "__main__":
     main()
