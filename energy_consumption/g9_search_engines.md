@@ -36,11 +36,20 @@ Search engines optimized for sustainability (e.g., Ecosia) will consume less ene
 ### Experiment Setup
 
 #### Software and Hardware
-- **Hardware**:   Add hardware here
+- **Hardware**:
+  - **Laptop**: Dell XPS 15 7590  
+  - **CPU**: Intel Core i9-9980HK @ 2.40GHz  
+  - **RAM**: 16GiB DDR4 @ 2667 MHz  
+  - **GPU**: NVIDIA GeForce GTX 1650 Mobile / Max-Q, Intel UHD Graphics 630
+  - **OS**: Ubuntu 24.04.2 LTS (linux)
+  - **Battery**: DELL GPM0365  
+  - **Wi-Fi**: Intel Wi-Fi 6 AX200  
+  - **Power Supply**: Dell charger, 19.5V 7.7A  
+
 - **Software**:  
-  - Python (v. 3.19): used to write the script to run the automated tests and log/analyze the results
-  - Selenium (v. 4.29.0): a python package used to simulate the (Chromium based) browser along with clicks and any realistic input a user would make
-  - EnergiBridge (v. 0.0.7): The energy profiler **EnergiBridge**[^energibrigde] is used to measure and log power consumption.  
+  - **Python (v. 3.19)**: used to write the script to run the automated tests and log/analyze the results
+  - **Selenium (v. 4.29.0)**: a python package used to simulate the (Chromium based) browser along with clicks and any realistic input a user would make
+  - **EnergiBridge (v. 0.0.7)**: The energy profiler **EnergiBridge**[^energibrigde] is used to measure and log power consumption.  
 
 #### Procedure
 
