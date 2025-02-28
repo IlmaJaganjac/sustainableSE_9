@@ -113,6 +113,8 @@ The plots show the distribution of `Average Power (W)` and `Total Energy (J)` ac
   <img src="../img/p1_measuring_software/g9_search_engines/hist_avg_total_energy.png" style="width:45%; height: 200px" alt="Histogram Average Total Energy">
 </div>
 
+###### Figure 2: a) Average power over time  b) a histogram for the total energy per search engine 
+
 - **Energy Delay Product (EDP):**
   
 EDP is a metric that balances energy efficiency and execution speed. It is defined as:
