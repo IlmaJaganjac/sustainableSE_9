@@ -137,6 +137,19 @@ This plot illustrates the distribution of EDP values for `w=1` across all iterat
 
 ###### Figure 3: Energy Delay Product per search engine
 
+## Additional Factors
+The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
+<!-- Selenium impact image -->
+<div style="margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:45%;" alt="Selenium Impact">
+<!-- </div>
+<!-- Memory image -->
+<!-- <div style="margin-top: 20px;"> -->
+  <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:45%;" alt="Memory Across Iterations">
+</div>
+
+###### Figure 4: a) Percentage of baseline duration to the total query search duration  b) Memory usage per search engine
+
 ## Analysis
 The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. Heatmaps visualize these comparisons:
 - These show the percentage change in `Average Power (W)` and `Total Energy (J)` between pairs of search engines, with color intensity indicating the magnitude of difference. Positive values indicate Engine B consumes more than Engine A, and vice versa.
@@ -149,20 +162,9 @@ The analysis leverages statistical tests and pairwise comparisons to evaluate di
   <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Total_Energy_(J).png" style="width:45%;" alt="Heatmap Total Energy">
 </div>
 
-###### Figure 4: a) Heatmap comparsion of Average Power percentage change  b) Total Energy percentage change
+###### Figure 5: a) Heatmap comparsion of Average Power percentage change  b) Total Energy percentage change
 
-## Additional Factors
-The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
-<!-- Selenium impact image -->
-<div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:45%;" alt="Selenium Impact">
-<!-- </div>
-<!-- Memory image -->
-<!-- <div style="margin-top: 20px;"> -->
-  <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:45%;" alt="Memory Across Iterations">
-</div>
 
-###### Figure 5: a) Percentage of baseline duration to the total query search duration  b) Memory usage per search engine
 
 ## Statistical Evaluation  
 The statistical evaluation of the energy and power metrics provides insight into the differences between search engines and the reliability of these differences.
