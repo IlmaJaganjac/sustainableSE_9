@@ -3,7 +3,7 @@ author: Student1 First and Last Name, Student2, Marvin Blommestijn, Pravesha Ram
 title: "Energy Efficiency of Search Engines"
 image: "../img/p1_measuring_software/gX_template/cover.png"
 date: 2202/2025
-summary: |-
+summary: This study examines the energy consumption of various search engines from a user’s perspective, focusing on power usage, response time, and efficiency. By measuring energy consumption during search queries on different platforms, we highlight how search engines vary in their resource demands. The findings reveal that while some engines prioritize speed or privacy, others consume significantly more energy per query. Understanding these differences is crucial for promoting sustainable digital habits and optimizing search engine use for lower environmental impact.
  
 ---
 
