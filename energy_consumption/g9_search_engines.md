@@ -79,7 +79,7 @@ From Energibridge we extracted a variety of metrics, including:
 - **Time**: A timestamp (in milliseconds) that indicates when the measurement was taken.
 - **Delta**: The elapsed time (in milliseconds) since the previous measurement. This is added as a buffer to the start and end time to map the timestamps because of inconsistencies.
 - **Package Energy (J)**: The cumulative energy consumption of the CPU package (in joules). This reflects how much energy the processor has used.
-- **Total Memory**: The total amount of system memory (in bytes) available on the machine.
+- **Total Memory**: The total amount of system memory available on the machine.
 
 
 ### Energy Consumption & Power
