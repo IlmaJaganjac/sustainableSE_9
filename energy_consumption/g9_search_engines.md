@@ -29,7 +29,7 @@ We compare 12 different search engines: Google[^google], Bing[^bing], Yahoo[^yah
 How does energy consumption vary across different search engines during common search activities?
 
 **Hypothesis**  
-Search engines optimized for sustainability (e.g., Ecosia) will consume less energy than mainstream alternatives (e.g., Google), and certain features (e.g., dark mode, minimalist UI) will reduce power consumption.
+Search engines optimized for sustainability (e.g., Ecosia) will consume less energy than mainstream alternatives (e.g., Google).
 
 ---
 
@@ -53,11 +53,11 @@ Search engines optimized for sustainability (e.g., Ecosia) will consume less ene
 
 #### Procedure
 
-Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task such as calculating a Fibonacci seqeuence to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
+Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task, calculating a Fibonacci seqeuence, for 5 minutes to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
 
 Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology. Due to time constraints we run 1 query "angular route uib tab".
 
-During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, the test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. After doing a query with a search engine, we wait 10 seconds before continuing to let the CPU return to normal levels. In addition, a **1–2 minute rest interval** is observed between test iterations so the system can return to an idle state before the next measurement.
+During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, the test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. After doing a query with a search engine, we wait **60 seconds** before continuing to let the CPU return to normal levels. In addition, an additional **1 minute rest interval** is observed between test iterations so the system can return to an idle state before the next measurement. Due to the experiment's scale, we automated the query search using **Selenium**.
 
 Throughout each iteration, **Energibridge** logs timestamps to mark the start and end of the test window, and all power samples within that interval are aggregated to determine the total energy (in Joules) consumed by the search operation. 
 
@@ -66,50 +66,80 @@ Finally, we employ statistical tests to measure the differences between all the 
 <!-- Insert description on preliminary results and discovery of cookie/automation time and why baseline was introduced -->
 During the initial runs, we observed unexpected variations in the recorded energy consumption. After investigating potential sources of discrepancy, we identified two key factors affecting our measurements:
 
- 1. Cookie and Automation Detection: Search engines often modify their behavior when automated scripts perform queries, sometimes loading additional elements, triggering bot detection mechanisms, or introducing CAPTCHAs. This introduces variability in response times and energy consumption.
-
- 2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage without any user interaction. By subtracting this baseline from the total recorded energy, we ensure that our results reflect the actual energy cost of performing a search rather than simply loading the search engine.
+ 1. Cookie and Automation Detection: Search engines often modify their behavior when automated scripts perform queries, sometimes loading additional elements, triggering bot detection mechanisms, or introducing CAPTCHAs. Therefore we had to mimic humanlike behaviour by including random sleeps. This introduces variability in response times and energy consumption.
+ 2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
 
 # Results
+In this experiment, energy and power consumption were calculated to assess the efficiency of different search engines over 30 iterations. Below is an explanation of how these metrics were derived and what their outputs were:
 
 ## Plots and Visualizations
-## Analysis
 - **Performance Metrics:** -
-- Energy & Power
+Energy & Power
+
+
+- **Power Calculation**: Power was calculated as the rate of energy change over time. The formula used is:
+$$
+\text{Power (W)} = \frac{\Delta \text{Energy (J)}}{\Delta t \ (\text{ms})} \times 1000
+$$
+Here, `ΔEnergy` is the difference in energy between two consecutive measurements (in joules), and `Δt` is the time difference (in milliseconds). Multiplying by 1000 converts the result from joules per millisecond to watts (joules per second).
+
+- **Total Energy Calculation**: The total energy consumed during each iteration, referred to as Package Energy, was computed as:
+   \[
+\text{Total Energy (J)} = E_{\text{end}} - E_{\text{begin}}
+\]
+  Where `E_end` is the energy value at the end of the iteration, and `E_begin` is the energy value at the start, both measured in joules.
+
+These plots show the distribution of `Total Energy (J)` and `Average Power (W)` across all iterations for each search engine. The violin shape illustrates the density of values.
 <!-- Violin plots side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center;">
-  <img src="../img/p1_measuring_software/g9_search_engines/violin_avg_power.png" style="width:45%;" alt="Violin Plot Average Power">
-  <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:45%;" alt="Violin Plot Total Energy">
+  <img src="../img/p1_measuring_software/g9_search_engines/violin_avg_power.png" style="width:90%;" alt="Violin Plot Average Power">
+  <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:90%;" alt="Violin Plot Total Energy">
 </div>
-
+- The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in energy consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
 <!-- Aggregated metrics and histogram side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/aggregated_metrics.png" style="width:45%;" alt="Aggregated Metrics">
-  <img src="../img/p1_measuring_software/g9_search_engines/hist_avg_total_energy.png" style="width:45%;" alt="Histogram Average Total Energy">
+  <img src="../img/p1_measuring_software/g9_search_engines/hist_avg_total_energy.png" style="width:45%; height: 200px" alt="Histogram Average Total Energy">
 </div>
+
+- **Energy Delay Product (EDP):**
+EDP is a metric that balances energy efficiency and execution speed. It is defined as:
+\[
+\text{EDP} = E \cdot t^w = (\Delta P \cdot t) \cdot t^w
+\] 
+
 
 <!-- Energy Delay Product image -->
+This plot illustrates the distribution of EDP values for `w=1` across all iterations per search engine. It highlights the variability and central tendency of EDP, showing how energy efficiency trades off with execution time.
 <div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/boxplot_edp_w=1.png" style="width:50%;" alt="Energy Delay Product">
+  <img src="../img/p1_measuring_software/g9_search_engines/boxplot_edp_w=1.png" style="width:90%" alt="Energy Delay Product">
 </div>
 
-<!-- Selenium impact image -->
-<div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:50%;" alt="Selenium Impact">
-</div>
+
+## Analysis
+The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. Heatmaps visualize these comparisons:
+- **Heatmaps**: These show the percentage change in `Average Power (W)` and `Total Energy (J)` between pairs of search engines, with color intensity indicating the magnitude of difference. Positive values indicate Engine B consumes more than Engine A, and vice versa.
+
 
 <!-- Heatmaps side-by-side -->
-<div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
+<!-- Heatmaps side-by-side -->
+<div style="display: flex; justify-content: space-around; align-items: center; margin-top: 30px;">
   <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Average_Power_(W).png" style="width:45%;" alt="Heatmap Average Power">
   <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Total_Energy_(J).png" style="width:45%;" alt="Heatmap Total Energy">
 </div>
 
-<!-- Memory image -->
+## Additional Factors
+The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
+<!-- Selenium impact image -->
 <div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:50%;" alt="Memory Across Iterations">
+  <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:45%;" alt="Selenium Impact">
+<!-- </div>
+<!-- Memory image -->
+<!-- <div style="margin-top: 20px;"> -->
+  <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:45%;" alt="Memory Across Iterations">
 </div>
 
-- **Statistical Evaluation:**  
+## Statistical Evaluation  
   Apply statistical tests (e.g., Shapiro- Wilk test, Welch’s t-test, Cohen’s D). Statistical significance. . Is data normal?
   
 | Metric                         |     Bing |   Brave Search |   DuckDuckGo |     Ecosia |    Google |    Mojeek |   OceanHero |     Qwant |   Startpage |   Swisscows |     You.com |
@@ -123,7 +153,7 @@ During the initial runs, we observed unexpected variations in the recorded energ
 
 <!-- Effect size image -->
 <div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.jpg" style="width:50%;" alt="Effect Size Significance">
+  <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.jpg" style="width:90%;" alt="Effect Size Significance">
 </div>
 
 
@@ -141,6 +171,12 @@ Comparative analysis across search engines supports these trends, particularly i
 One of the key limitations of this study is that it only considers the client-side energy consumption, meaning the power usage of the user's device while performing search queries. However, search engines rely on extensive backend infrastructure, including data centers, caching mechanisms, and network requests, which also contribute significantly to their overall energy footprint. Since this study does not have access to backend server energy consumption data, it presents only a partial view of the environmental impact of different search engines. Future research would benefit from incorporating end-to-end energy consumption analysis, including network energy usage and server-side power draw, to provide a more holistic comparison of search engine sustainability.
 
 Another limitation is the controlled testing environment, which does not fully replicate real-world usage conditions. The experiment was conducted with a fixed set of developer-focused queries, a single test system, and under an isolated "Zen mode" to minimize background noise. However, in everyday scenarios, search engine energy consumption could be influenced by factors such as hardware variations, network conditions, browser configurations, and concurrent background processes. Additionally, packet loss and TCP retransmissions were reported during testing, requiring additional CPU work and increasing energy usage in some cases. Poor network conditions can introduce inconsistencies in energy consumption, making it difficult to isolate search engine efficiency from network-related inefficiencies. These external factors may cause differences in energy efficiency that this study does not account for, limiting the generalizability of the results to a broader audience.
+
+A further limitation resulted from the methodological adjustments required during the experimental design. Originally, the plan was to execute 16 queries per iteration. However, given that executing 16 queries would have required: query duration * 16 * 12 * 60-second wait per query * 30 iterations, plus an additional 30 minutes of waiting time per iteration + the uniform sleeps to appear more humanlike in the selenium queries —the estimated total runtime would have been roughly 100 hours. Consequently, the experiment was reduced to a single query per iteration. It could be debated that query-side handling is managed on the search engine side rather than on the client side, and therefore might not be applicable to our study; however, this remains a methodological constraint.
+
+Another practical challenge encountered was the failure of Yahoo when using Selenium. Inspection of the process revealed that Yahoo's homepage contained a large number of advertisements, which made it difficult to reliably locate the search bar within the imposed 15-second timeout constraint.
+
+Finally, an important limitation concerns the timing of the baseline measurements relative to the actual experiments. The baseline measurements were taken during peak usage hours, whereas the main experiment was conducted overnight during off-peak hours. As a result, the baseline measurement (which did not include the query search component) exceeded the total duration (loading page, accepting cookies, and performing the query search) recorded during off-peak hours. This discrepancy was particularly evident in the data for Ecosia. Since rerunning the experiment was not feasible, we accounted for this by dividing the baseline measurement by a factor of **4**, based on a study [^peak] that found mean response times for search engines ranged from 2 to 9 seconds during off-peak hours, while during peak hours, the response time increased to 15 seconds and in some cases reached up to 30 seconds.
   
 - **Future Research:**  
 Future research should explore a more comprehensive measurement approach that includes both client-side and server-side energy consumption. Collaborating with search engine providers or leveraging publicly available data on server energy usage could help assess the total environmental cost of search queries. Additionally, measuring the energy impact of different types of searches (e.g., text vs. image/video searches) and incorporating network-level energy consumption (such as data transfer between the user and the search engine) would provide a more complete understanding of search engine sustainability.
@@ -420,3 +456,4 @@ For researchers interested in replicating this study, the complete replication p
 [^perplexity]: [Perplexity AI](https://www.perplexity.ai)
 [^developersearches]: [Developer Searches](https://medium.com/design-bootcamp/the-hidden-insights-in-developers-google-searches-47f05030cd2d)
 [^searches]: [Amount of Searches](https://explodingtopics.com/blog/google-searches-per-day)
+[^peak]: [Peak vs off peak hours](https://scielo.org.za/scielo.php?script=sci_arttext&pid=S0038-23532010000600020)
