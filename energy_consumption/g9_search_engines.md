@@ -153,7 +153,7 @@ And finally, future work could explore the sustainability impact of cookies, as 
 
 # Conclusion
 
-<!-- Edit conclusion to also mention the 'normal' plots of Google -->
+The findings of this study highlight significant differences in energy consumption, response times, and power efficiency among various search engines, suggesting that design choices impact sustainability. While Startpage exhibited the longest response times and highest energy delay product, Ecosia and OceanHero demonstrated greater variability in power consumption, likely due to differences in how queries are processed. Google, often assumed to be resource-intensive, emerged as one of the more energy-efficient search engines, alongside Mojeek, while You.com and Bing showed the highest total energy consumption. These observations underscore the trade-offs between speed, privacy-focused features, and backend complexity in determining a search engine’s sustainability. However, this analysis is limited to client-side energy use, leaving out the significant contributions of backend infrastructure and network activity. Additionally, factors like TCP retransmissions and packet loss during testing indicate that network conditions can also affect energy consumption, further complicating direct comparisons. Future research should integrate both client-side and server-side measurements, explore the energy impact of different query types, and examine the sustainability implications of cookies, automation protection, and AI-driven search tools. As search engines continue to evolve, balancing performance with energy efficiency will be crucial in minimizing their environmental footprint.
 
 # Replication Package
 
