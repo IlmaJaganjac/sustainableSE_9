@@ -70,13 +70,36 @@ During the initial runs, we observed unexpected variations in the recorded energ
  2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
 
 # Results
-In this experiment, we measured energy and power consumption to evaluate the efficiency of various search engines. The distributions of these metrics were analyzed over 30 iterations—both by calculating their averages and by examining their overall spread. Below is an explanation of how these metrics were derived and a description of their outputs.
+In this experiment, we measured energy and power consumption to evaluate the efficiency of various search engines. The distributions of these metrics were analyzed over the 30 iterations—both by calculating their averages and by examining their overall spread. Below is an explanation of how these metrics were derived and a description of their outputs.
 
-## Plots and Visualizations
-- **Performance Metrics:**
-  
-Energy & Power
-- **Power Calculation**: Power was calculated as the rate of energy change over time. i.e.:
+## Performance Metrics:
+
+From Energibridge we extracted a variety of metrics, including:
+
+- **Time**: A timestamp (in milliseconds) that indicates when the measurement was taken.
+- **Delta**: The elapsed time (in milliseconds) since the previous measurement. This is added as a buffer to the start and end time to map the timestamps because of inconsistencies.
+- **Package Energy (J)**: The cumulative energy consumption of the CPU package (in joules). This reflects how much energy the processor has used.
+- **Total Memory**: The total amount of system memory (in bytes) available on the machine.
+
+
+### Energy Consumption & Power
+With these metrics we have calculated the following;
+
+**Total Energy consumption** was computed as:  
+  `Total Energy (J) = E_end - E_begin`  
+  Where `E_begin` and `E_end` are the energy values at the start and end of an iteration.
+
+**Power** is the rate at which energy is used, measured in watts (`W`), where 1 W = 1 J/s.
+
+ `Power (W) = (ΔEnergy / Δt) * 1000`  
+  Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds).
+
+- 
+The plots show the distribution of `Total Energy (J)` and `Average Power (W)` across 30 iterations for each search engine, with violin plots illustrating the density of values.
+
+
+- **Energy consumption & Power**
+  Power was calculated as the rate of energy change over time. i.e.:
   
 Power (W) = (`ΔEnergy` / `Δt` ) * 1000
 
