@@ -73,22 +73,44 @@ During the initial runs, we observed unexpected variations in the recorded energ
 # Results
 
 ## Plots and Visualizations
-
-- **Violin + Box Plots:**  
-  
-- **Histograms, density Plots:**
-
-
 ## Analysis
+- **Performance Metrics:** -
+- Energy & Power
+<!-- Violin plots side-by-side -->
+<div style="display: flex; justify-content: space-around; align-items: center;">
+  <img src="../img/p1_measuring_software/g9_search_engines/violin_avg_power.png" style="width:45%;" alt="Violin Plot Average Power">
+  <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:45%;" alt="Violin Plot Total Energy">
+</div>
+
+<!-- Aggregated metrics and histogram side-by-side -->
+<div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/aggregated_metrics.png" style="width:45%;" alt="Aggregated Metrics">
+  <img src="../img/p1_measuring_software/g9_search_engines/hist_avg_total_energy.png" style="width:45%;" alt="Histogram Average Total Energy">
+</div>
+
+<!-- Energy Delay Product image -->
+<div style="margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/boxplot_edp_w=1.png" style="width:50%;" alt="Energy Delay Product">
+</div>
+
+<!-- Selenium impact image -->
+<div style="margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:50%;" alt="Selenium Impact">
+</div>
+
+<!-- Heatmaps side-by-side -->
+<div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Average_Power_(W).png" style="width:45%;" alt="Heatmap Average Power">
+  <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Total_Energy_(J).png" style="width:45%;" alt="Heatmap Total Energy">
+</div>
+
+<!-- Memory image -->
+<div style="margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:50%;" alt="Memory Across Iterations">
+</div>
 
 - **Statistical Evaluation:**  
   Apply statistical tests (e.g., Shapiro- Wilk test, Welch’s t-test, Cohen’s D). Statistical significance. . Is data normal?
-
-- **Performance Metrics:** - 
-  - time energy etc energibridge data
-  - Energy & Power
-  - Energy delay product  
-
   
 | Metric                         |     Bing |   Brave Search |   DuckDuckGo |     Ecosia |    Google |    Mojeek |   OceanHero |     Qwant |   Startpage |   Swisscows |     You.com |
 |:-------------------------------|---------:|---------------:|-------------:|-----------:|----------:|----------:|------------:|----------:|------------:|------------:|------------:|
@@ -99,6 +121,10 @@ During the initial runs, we observed unexpected variations in the recorded energ
 
 ###### Table : Shapiro-Wilik test result for the metrics Average Power (w) and Total Energy (J) per search engine (the data has outliers removed)
 
+<!-- Effect size image -->
+<div style="margin-top: 20px;">
+  <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.png" style="width:50%;" alt="Effect Size Significance">
+</div>
 
 
 
