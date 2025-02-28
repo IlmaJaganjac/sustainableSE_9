@@ -67,7 +67,7 @@ Finally, we employ statistical tests to measure the differences between all the 
 During the initial runs, we observed unexpected variations in the recorded energy consumption. After investigating potential sources of discrepancy, we identified two key factors affecting our measurements:
 
  1. Cookie and Automation Detection: Search engines often modify their behavior when automated scripts perform queries, sometimes loading additional elements, triggering bot detection mechanisms, or introducing CAPTCHAs. Therefore we had to mimic humanlike behaviour by including random sleeps. This introduces variability in response times and energy consumption.
- 2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
+ 2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search for 30 iterations and averaged them. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
 
 # Results
 In this experiment, we measured energy and power consumption to evaluate the efficiency of various search engines. The distributions of these metrics were analyzed over the 30 iterations—both by calculating their averages and by examining their overall spread. Below is an explanation of how these metrics were derived and a description of their outputs.
@@ -138,7 +138,7 @@ This plot illustrates the distribution of EDP values for `w=1` across all iterat
 ###### Figure 3: Energy Delay Product per search engine
 
 ## Additional Factors
-The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
+The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements and the importance of baseline subtraction. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
 <!-- Selenium impact image -->
 <div style="margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/barplot_selenium_metrics.png" style="width:45%;" alt="Selenium Impact">
