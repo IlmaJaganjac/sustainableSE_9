@@ -70,7 +70,7 @@ During the initial runs, we observed unexpected variations in the recorded energ
  2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
 
 # Results
-In this experiment, energy and power consumption were calculated to assess the efficiency of different search engines. Below is an explanation of how these metrics were derived and what their outputs were:
+In this experiment, we measured energy and power consumption to evaluate the efficiency of various search engines. The distributions of these metrics were analyzed over 30 iterations—both by calculating their averages and by examining their overall spread. Below is an explanation of how these metrics were derived and a description of their outputs.
 
 ## Plots and Visualizations
 - **Performance Metrics:**
