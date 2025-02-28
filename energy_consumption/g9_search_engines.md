@@ -55,7 +55,7 @@ Search engines optimized for sustainability (e.g., Ecosia) will consume less ene
 
 Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task such as calculating a Fibonacci seqeuence to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
 
-Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology:
+Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology. Due to time constraints we run 1 random query per iteration from the below selection:
 
 - angular route uib tab
 - react setstate sub property
@@ -74,13 +74,18 @@ Under these conditions, **identical search queries** (for instance, “climate c
  -babel-jest → can’t console log in babel jest → logging in babel-jest → jest-cli
  -json minify
 
-During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, each test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. In addition, a **1–2 minute rest interval** is observed between tests so the system can return to an idle state before the next measurement.
+During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, the test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. After doing a query with a search engine, we wait 10 seconds before continuing to let the CPU return to normal levels. In addition, a **1–2 minute rest interval** is observed between test iterations so the system can return to an idle state before the next measurement.
 
 Throughout each iteration, **Energibridge** logs timestamps to mark the start and end of the test window, and all power samples within that interval are aggregated to determine the total energy (in Joules) consumed by the search operation. 
 
 Finally, we employ statistical tests to measure the differences between all the engines and see if our data is valid (as in if they are normal) and if there is any statistical difference.
 
 <!-- Insert description on preliminary results and discovery of cookie/automation time and why baseline was introduced -->
+During the initial runs, we observed unexpected variations in the recorded energy consumption. After investigating potential sources of discrepancy, we identified two key factors affecting our measurements:
+
+ 1. Cookie and Automation Detection: Search engines often modify their behavior when automated scripts perform queries, sometimes loading additional elements, triggering bot detection mechanisms, or introducing CAPTCHAs. This introduces variability in response times and energy consumption.
+
+ 2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage without any user interaction. By subtracting this baseline from the total recorded energy, we ensure that our results reflect the actual energy cost of performing a search rather than simply loading the search engine.
 
 # Results
 
