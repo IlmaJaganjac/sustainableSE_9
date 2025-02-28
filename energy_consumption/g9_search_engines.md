@@ -104,7 +104,7 @@ The plots show the distribution of `Average Power (W)` and `Total Energy (J)` ac
   <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:90%;" alt="Violin Plot Total Energy">
 </div>
 
-###### Figure 1: Violion plots for the distribution per search engine for the metrics average power and total energy consumed 
+###### Figure 1: Violin plots for the distribution per search engine for the metrics average power and total energy consumed 
 
 - The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in power consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
 <!-- Aggregated metrics and histogram side-by-side -->
