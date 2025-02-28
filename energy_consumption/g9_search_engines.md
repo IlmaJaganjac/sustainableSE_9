@@ -138,7 +138,16 @@ The bar plot quantifies the percentage of Selenium overhead versus actual query 
 </div>
 
 ## Statistical Evaluation  
-  Apply statistical tests (e.g., Shapiro- Wilk test, Welch’s t-test, Cohen’s D). Statistical significance. . Is data normal?
+The statistical evaluation of the energy and power metrics provides insight into the differences between search engines and the reliability of these differences.
+
+### Normality Assessment
+
+For each search engine, the Shapiro–Wilk test was used to determine if the data for `Average Power (W)` and `Total Energy (J)` are normally distributed:
+
+- **A p-value < 0.05** indicates that the data does not follow a normal distribution.
+- When data is non-normal, it suggests that the underlying distributions have outliers or are skewed, which can impact the choice of statistical tests for further analysis.
+
+The table above summarizes the test statistics and corresponding p-values for each search engine. For instance, some search engines have very low p-values (e.g., DuckDuckGo with p-value 8.72 *10^-6 for Average Power), indicating a significant departure from normality, whereas others like Bing have higher p-values, suggesting the data for those metrics are closer to normally distributed.
   
 | Metric                         |     Bing |   Brave Search |   DuckDuckGo |     Ecosia |    Google |    Mojeek |   OceanHero |     Qwant |   Startpage |   Swisscows |     You.com |
 |:-------------------------------|---------:|---------------:|-------------:|-----------:|----------:|----------:|------------:|----------:|------------:|------------:|------------:|
@@ -149,10 +158,33 @@ The bar plot quantifies the percentage of Selenium overhead versus actual query 
 
 ###### Table : Shapiro-Wilik test result for the metrics Average Power (w) and Total Energy (J) per search engine (the data has outliers removed)
 
+## Pairwise Comparisons and Effect Size
+Once normality is assessed, pairwise comparisons between search engines are performed to understand the differences in energy consumption and power usage. The analysis employs:
+
+- **Welch's t-test** for normally distributed data.
+- **Mann–Whitney U test** for non-normal data.
+
+Along with the significance tests (using a threshold of p < 0.05 to denote statistical significance), effect sizes are calculated to quantify the magnitude of the differences. Effect sizes, such as Cohen's d for normal data or rank-biserial correlations for non-normal data, provide a standardized measure to compare differences across groups. They help answer not just whether a difference is statistically significant, but also how large that difference is in practical terms.
+
+### Visualizing Effect Size and Significance
+
+The scatter plot visualizes the effect sizes along with the significance levels:
+
+- **Points with larger effect sizes** indicate more substantial differences between search engines.
+- The visualization helps to quickly identify which comparisons are both statistically significant (i.e., \(p < 0.05\)) and meaningful in magnitude.
+
 <!-- Effect size image -->
 <div style="margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.jpg" style="width:90%;" alt="Effect Size Significance">
 </div>
+
+### Importance of the Findings
+
+Understanding both the statistical significance and the effect size is crucial:
+- **Statistical significance** tells us if the observed differences are unlikely to be due to chance.
+- **Effect size** reveals the practical importance of these differences. This dual insight is vital for making informed decisions about which search engines are more energy efficient or perform better in terms of power consumption.
+
+In summary, the statistical evaluation not only confirms that there are measurable differences in energy and power metrics among search engines but also highlights the extent of these differences. This comprehensive approach ensures that the conclusions drawn are robust and meaningful for real-world applications.
 
 
 
