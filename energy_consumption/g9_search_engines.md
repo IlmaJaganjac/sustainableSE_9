@@ -55,24 +55,7 @@ Search engines optimized for sustainability (e.g., Ecosia) will consume less ene
 
 Prior to any measurements, the system is placed in a **Zen mode** by closing all applications and unnecessary background services, disabling notifications and removing additional hardware, minimizing CPU and disk activity. This setup minimizes external variables that could otherwise impact energy usage. A brief **warm-up** follows, introducing a CPU-intensive task such as calculating a Fibonacci seqeuence to bring the system to a consistent operating temperature to ensure more accurate energy measurements.
 
-Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology. Due to time constraints we run 1 random query per iteration from the below selection:
-
-- angular route uib tab
-- react setstate sub property
-- bootstrap button next to input
-- forcelayout api
-- golang copy built in
-- strlen
-- java comparator interface → java default string comparator
-- ubuntu search packages
-- URI uri = new URIBuilder
-- java throw exception example
-- mdn transform origin
- -segmented circle css
- -boilerplate template
- -show is not a member of org.apache.spark.sql.GroupedData
- -babel-jest → can’t console log in babel jest → logging in babel-jest → jest-cli
- -json minify
+Under these conditions, **identical search queries** (for instance, “climate change effects”) are performed on each search engine from the prespective of the profile user we chose (a student developer). Based on the article[^developersearches] "The hidden insights in developers’ Google searches", the average developer makes around 16 searches a day, searching for a variety of information like how to use an API, troubleshoot or learn to use a new technology. Due to time constraints we run 1 query "angular route uib tab".
 
 During this process, energy usage, CPU load, and other relevant performance metrics are recorded. To ensure reliability, the test is repeated **30** times and the order of search engines is randomized to avoid systematic bias. After doing a query with a search engine, we wait 10 seconds before continuing to let the CPU return to normal levels. In addition, a **1–2 minute rest interval** is observed between test iterations so the system can return to an idle state before the next measurement.
 
