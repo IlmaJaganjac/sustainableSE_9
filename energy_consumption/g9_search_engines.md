@@ -77,16 +77,15 @@ In this experiment, energy and power consumption were calculated to assess the e
 Energy & Power
 
 
-- **Power Calculation**: Power was calculated as the rate of energy change over time. The formula used is:
-$$
-\text{Power (W)} = \frac{\Delta \text{Energy (J)}}{\Delta t \ (\text{ms})} \times 1000
-$$
-Here, `ΔEnergy` is the difference in energy between two consecutive measurements (in joules), and `Δt` is the time difference (in milliseconds). Multiplying by 1000 converts the result from joules per millisecond to watts (joules per second).
+- **Power Calculation**: Power was calculated as the rate of energy change over time. i.e.:
+  
+Power (W) = (`ΔEnergy` / `Δt` ) * 1000
+
+Here, `ΔEnergy` is the difference in energy between two consecutive measurements (in joules), and `Δt` is the time difference (in milliseconds therefore factor 1000).
 
 - **Total Energy Calculation**: The total energy consumed during each iteration, referred to as Package Energy, was computed as:
-   \[
-\text{Total Energy (J)} = E_{\text{end}} - E_{\text{begin}}
-\]
+  
+Total Energy (J) = `E_end` - `E_begin`
   Where `E_end` is the energy value at the end of the iteration, and `E_begin` is the energy value at the start, both measured in joules.
 
 These plots show the distribution of `Total Energy (J)` and `Average Power (W)` across all iterations for each search engine. The violin shape illustrates the density of values.
@@ -104,9 +103,8 @@ These plots show the distribution of `Total Energy (J)` and `Average Power (W)` 
 
 - **Energy Delay Product (EDP):**
 EDP is a metric that balances energy efficiency and execution speed. It is defined as:
-\[
-\text{EDP} = E \cdot t^w = (\Delta P \cdot t) \cdot t^w
-\] 
+
+EDP = `E` * `t`^`w`
 
 
 <!-- Energy Delay Product image -->
