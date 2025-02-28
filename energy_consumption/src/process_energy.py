@@ -331,7 +331,6 @@ def main():
     try:
         timestamps_df, energy_df = load_data(TIMESTAMPS_FILE, ENERGY_LOG_FILE)
         timestamps_df["End Time"] -= 60000
-        timestamps_df.loc[timestamps_df["Search Engine"] == "Google", "Baseline Overhead (ms)"] = 10998.466666666667
         timestamps_df["Baseline Overhead (ms)"] /= 4
         timestamps_df["Normalized Duration (ms)"] = (timestamps_df["End Time"] - timestamps_df["Start Time"]) - timestamps_df["Baseline Overhead (ms)"]
 
