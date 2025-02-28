@@ -207,6 +207,8 @@ Understanding both the statistical significance and the effect size is crucial:
 - **Statistical significance** tells us if the observed differences are unlikely to be due to chance.
 - **Effect size** reveals the practical importance of these differences. This dual insight is vital for making informed decisions about which search engines are more energy efficient or perform better in terms of power consumption.
 
+The departure from normality is mainly due to the random waiting times implemented to bypass bot detection, which introduces variability in the energy and power measurements. Additionally, delayed DOM node loading and potential memory leaks, as observed with Ecosia’s increasing memory usage, further contribute to inconsistencies. These factors create irregular fluctuations in resource consumption, leading to skewed distributions and outliers in the data that depend on the run and can't always be automatically removed (from furthe reruns).
+
 In summary, the statistical evaluation not only confirms that there are measurable differences in energy and power metrics among search engines but also highlights the extent of these differences. This comprehensive approach ensures that the conclusions drawn are robust and meaningful for real-world applications.
 
 
