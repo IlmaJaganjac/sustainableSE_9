@@ -151,7 +151,9 @@ The bar plot quantifies the percentage of Selenium overhead versus actual query 
 ###### Figure 4: a) Percentage of baseline duration to the total query search duration  b) Memory usage per search engine
 
 ## Analysis
-The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. Heatmaps visualize these comparisons:
+The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. 
+## Percentage comparison
+Heatmaps visualize these comparisons:
 - These show the percentage change in `Average Power (W)` and `Total Energy (J)` between pairs of search engines, with color intensity indicating the magnitude of difference. Positive values indicate Engine B consumes more than Engine A, and vice versa.
 
 
@@ -176,7 +178,7 @@ For each search engine, the Shapiro–Wilk test was used to determine if the dat
 - **A p-value < 0.05** indicates that the data does not follow a normal distribution.
 - When data is non-normal, it suggests that the underlying distributions have outliers or are skewed, which can impact the choice of statistical tests for further analysis.
 
-The table above summarizes the test statistics and corresponding p-values for each search engine. For instance, some search engines have very low p-values (e.g., DuckDuckGo with p-value 8.72 *10^-6 for Average Power), indicating a significant departure from normality, whereas others like Bing have higher p-values, suggesting the data for those metrics are closer to normally distributed.
+The table below summarizes the test statistics and corresponding p-values for each search engine for the two metrics. For instance, some search engines have very low p-values (e.g., DuckDuckGo with p-value 8.72 *10^-6 for Average Power), indicating a significant departure from normality, whereas others like Bing have higher p-values, suggesting the data for those metrics are closer to normally distributed.
   
 | Metric                         |     Bing |   Brave Search |   DuckDuckGo |     Ecosia |    Google |    Mojeek |   OceanHero |     Qwant |   Startpage |   Swisscows |     You.com |
 |:-------------------------------|---------:|---------------:|-------------:|-----------:|----------:|----------:|------------:|----------:|------------:|------------:|------------:|
