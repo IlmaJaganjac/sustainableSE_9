@@ -87,14 +87,14 @@ With these metrics we have calculated the following;
 
 **Total Energy consumption** was computed as:   
        
-  Total Energy (J) = `E_end` - `E_begin`  
+   - Total Energy (J) = `E_end` - `E_begin`  
   
   Where `E_begin` and `E_end` are the energy values at the start and end of executing a query. 
 
 **Power** is the rate at which energy is used, measured in watts (`W`), where 1 W = 1 J/s.
   
-  Power (W) = (`ΔEnergy` / `Δt`) * 1000  
-  Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds) for the duration of the query execution.
+  - Power (W) = (`ΔEnergy` / `Δt`) * 1000  
+Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds) for the duration of the query execution.
 
 
 The plots show the distribution of `Average Power (W)` and `Total Energy (J)` across 30 iterations for each search engine, with violin plots illustrating the density of values.
@@ -116,13 +116,18 @@ To further illustrate how these metrics affect efficiency, we also examined the 
 
 ###### Figure 2: a) Average power over time  b) a histogram for the total energy per search engine 
 
-- **Energy Delay Product (EDP):**
-  
-EDP is a metric that balances energy efficiency and execution speed. It is defined as:
+
+### Energy Delay Product (EDP)
+  As can be seen from figure 2 a) time plays an signifcant role in our experiment. That is why we also measured the EDP. It is a metric that balances energy efficiency and execution speed. It is defined as:
 
 EDP = `E` * `t`^`w`
 
+where `E` is the total energy and `t` the duration. `w` is an exponent that emphasizes the impact of execution time on overall efficiency. It represents the weight given to the execution time. It can take on different values depending on the focus of the measurement: 
+   - w = 1: Emphasizes energy efficiency, which is ideal when minimizing energy consumption is the   primary concern.
+   - w = 2: Provides a balanced view, considering both energy consumption and performance.
+   - w = 3: Focuses on performance efficiency, placing greater importance on faster execution times.
 
+We chose w = 1 as our main value to prioritize energy efficiency in our analysis.
 <!-- Energy Delay Product image -->
 This plot illustrates the distribution of EDP values for `w=1` across all iterations per search engine. It highlights the variability and central tendency of EDP, showing how energy efficiency trades off with execution time.
 <div style="margin-top: 20px;">
