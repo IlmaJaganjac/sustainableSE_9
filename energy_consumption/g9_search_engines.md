@@ -85,37 +85,27 @@ From Energibridge we extracted a variety of metrics, including:
 ### Energy Consumption & Power
 With these metrics we have calculated the following;
 
-**Total Energy consumption** was computed as:  
-  `Total Energy (J) = E_end - E_begin`  
-  Where `E_begin` and `E_end` are the energy values at the start and end of an iteration.
+**Total Energy consumption** was computed as:   
+       
+  Total Energy (J) = `E_end` - `E_begin`  
+  
+  Where `E_begin` and `E_end` are the energy values at the start and end of executing a query. 
 
 **Power** is the rate at which energy is used, measured in watts (`W`), where 1 W = 1 J/s.
-
- `Power (W) = (ΔEnergy / Δt) * 1000`  
-  Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds).
-
-- 
-The plots show the distribution of `Total Energy (J)` and `Average Power (W)` across 30 iterations for each search engine, with violin plots illustrating the density of values.
-
-
-- **Energy consumption & Power**
-  Power was calculated as the rate of energy change over time. i.e.:
   
-Power (W) = (`ΔEnergy` / `Δt` ) * 1000
+  Power (W) = (`ΔEnergy` / `Δt`) * 1000  
+  Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds) for the duration of the query execution.
 
-Here, `ΔEnergy` is the difference in energy between two consecutive measurements (in joules), and `Δt` is the time difference (in milliseconds therefore factor 1000).
 
-- **Total Energy Calculation**: The total energy consumed during each iteration, referred to as Package Energy, was computed as:
-  
-Total Energy (J) = `E_end` - `E_begin`
-  Where `E_end` is the energy value at the end of the iteration, and `E_begin` is the energy value at the start, both measured in joules.
-
-These plots show the distribution of `Total Energy (J)` and `Average Power (W)` across all iterations for each search engine. The violin shape illustrates the density of values.
+The plots show the distribution of `Average Power (W)` and `Total Energy (J)` across 30 iterations for each search engine, with violin plots illustrating the density of values.
 <!-- Violin plots side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center;">
   <img src="../img/p1_measuring_software/g9_search_engines/violin_avg_power.png" style="width:90%;" alt="Violin Plot Average Power">
   <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:90%;" alt="Violin Plot Total Energy">
 </div>
+
+###### Figure 1: Violion plots for the distribution per search engine for the metrics average power and total energy consumed 
+
 - The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in power consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
 <!-- Aggregated metrics and histogram side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
