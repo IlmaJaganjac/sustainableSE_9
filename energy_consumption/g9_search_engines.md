@@ -123,7 +123,7 @@ During the initial runs, we observed unexpected variations in the recorded energ
 
 <!-- Effect size image -->
 <div style="margin-top: 20px;">
-  <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.png" style="width:50%;" alt="Effect Size Significance">
+  <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.jpg" style="width:50%;" alt="Effect Size Significance">
 </div>
 
 
