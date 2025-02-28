@@ -6,6 +6,9 @@ from datetime import datetime
 import pandas as pd
 import socket
 import platform
+import socket
+import logging
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -16,7 +19,7 @@ from selenium.common.exceptions import (
     ElementClickInterceptedException)
 
 from selenium.webdriver.common.action_chains import ActionChains
-import logging
+
 # Search Engines
 SEARCH_ENGINES = {
     "Google": "https://www.google.com", 
@@ -52,16 +55,12 @@ SEARCH_QUERIES = [
 ]
 
 DEFAULT_DURATION = 60 #60 # Search test duration in seconds
-DEFAULT_WARMUP = 1 #300  # Warmup duration in seconds (should be 300 for real tests)
-# TEST_INTERVAL = 120 #120  # Pause between tests in seconds
+DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real tests)
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
 ITERATIONS = 30 #30  # Number of test iterations
 
 baseline_df = pd.read_csv("baseline_average.csv")
 BASE_LINE_OVERHEAD = baseline_df.set_index("Search Engine")["Baseline Duration (ms)"].to_dict()
-
-import time
-import socket
 
 def check_internet():
     """Returns True if internet is available, False otherwise."""
@@ -73,14 +72,11 @@ def check_internet():
 
 def wait_for_internet(polling_interval=10):
     """Pauses execution and waits until an internet connection is restored."""
-    log_message("No internet connection. Pausing execution...")
     
     while not check_internet():
         log_message(f"No internet detected. Retrying in {polling_interval} seconds...")
         time.sleep(polling_interval)  # Wait before checking again
     
-    log_message("Internet connection restored. Resuming execution...")
-
 def keep_system_awake():
     """Simulate activity to prevent system sleep, cross-platform."""
     try:
@@ -138,10 +134,6 @@ def warm_up(duration=DEFAULT_WARMUP):
         fib(30)
     log_message("Warm-up complete.")
 
-
-
-
-
 def setup_driver(max_attempts=3):
     """Setup WebDriver with retry mechanism."""
     wait_for_internet()
@@ -171,19 +163,6 @@ def setup_driver(max_attempts=3):
             if attempt < max_attempts - 1:
                 time.sleep(10)
     return None
-    # # Create driver
-    # driver = webdriver.Chrome(options=options)
-    # driver.set_page_load_timeout(300) 
-    # # Execute CDP commands to prevent detection
-    # driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-    #     "source": """
-    #     Object.defineProperty(navigator, 'webdriver', {
-    #         get: () => undefined
-    #     })
-    #     """
-    # })
-    
-    # return driver
 
 def handle_google(driver, query):
     try:
@@ -228,87 +207,6 @@ def handle_google(driver, query):
     except Exception as e:
         log_message(f"Error with Google search: {e}")
         return False
-
-
-# def handle_google(driver, query):
-#     try:
-#         # Maximize window to ensure elements are visible
-#         driver.maximize_window()
-        
-#         # 1. Switch to the consent iframe if present
-#         try:
-#             WebDriverWait(driver, 10).until(
-#                 EC.frame_to_be_available_and_switch_to_it(
-#                     (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
-#                 )
-#             )
-#             log_message("Switched to Google consent iframe")
-#         except TimeoutException:
-#             log_message("No Google consent iframe found or already handled")
-
-#         # 2. Handle consent button with multi-language support
-#         consent_texts = {
-#             "English": "Accept All",
-#             "Dutch": "Alles accepteren"
-#             # Add more languages if needed, e.g.:
-#             # "German": "Alle akzeptieren",
-
-#         }
-        
-#         consent_accepted = False
-#         for lang, text in consent_texts.items():
-#             try:
-#                 accept_button = WebDriverWait(driver, 5).until(
-#                     EC.element_to_be_clickable(
-#                         (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
-#                     )
-#                 )
-#                 # Use ActionChains for human-like click
-#                 actions = webdriver.ActionChains(driver)
-#                 actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
-#                 log_message(f"Clicked consent button in {lang} ('{text}')")
-#                 consent_accepted = True
-#                 time.sleep(random.uniform(1, 2))
-#                 break
-#             except TimeoutException:
-#                 continue
-        
-#         if not consent_accepted:
-#             log_message("Could not find any known consent button text")
-        
-#         # Always switch back to main content
-#         driver.switch_to.default_content()
-
-#         # 3. Perform the search
-#         search_box = WebDriverWait(driver, 15).until(
-#             EC.element_to_be_clickable((By.NAME, "q"))
-#         )
-        
-#         # Clear and input query with human-like typing
-#         search_box.clear()
-#         actions = webdriver.ActionChains(driver)
-#         actions.move_to_element(search_box).click()
-#         for char in query:
-#             actions.send_keys(char).pause(random.uniform(0.1, 0.3))
-#         actions.perform()
-        
-#         # Submit search with random delay
-#         time.sleep(random.uniform(0.5, 1.5))
-#         try:
-#             search_box.send_keys(Keys.RETURN)
-#         except:
-#             # Fallback to clicking search button
-#             search_button = WebDriverWait(driver, 5).until(
-#                 EC.element_to_be_clickable((By.NAME, "btnK"))
-#             )
-#             actions.move_to_element(search_button).pause(random.uniform(0.5, 1)).click().perform()
-        
-#         time.sleep(random.uniform(1, 3))  # Wait for results
-#         return True
-        
-#     except Exception as e:
-#         log_message(f"Error with Google search: {e}")
-#         return False
     
 def handle_yahoo(driver, query):
     """
@@ -645,7 +543,6 @@ def handle_default_search(driver, query):
         log_message(f"Error with search: {e}")
         return False
     
-
 class DriverManager:
     _driver = None
 
@@ -667,7 +564,6 @@ class DriverManager:
             cls._driver = None
             log_message("Driver closed.")
 
-
 def test_search_engine(engine, url, query, duration, baseline_overheads, driver):
     log_message(f"Testing {engine}")
    
@@ -676,20 +572,10 @@ def test_search_engine(engine, url, query, duration, baseline_overheads, driver)
 
     # Set up WebDriver with anti-detection measures
     driver.get(url)
-    
-    # if driver is None:  # If WebDriver failed to launch
-    #     log_message(f"Skipping {engine} due to WebDriver error.")
-    #     return None
-    
+   
 
     # Add a small random delay to appear more human-like
     time.sleep(random.uniform(0.5, 1.5))
-    
-    # # Open the search engine
-    # driver.get(url)
-    
-    # Add a random delay for page load
-    # time.sleep(random.uniform(1.5, 3.0))
     
     # Initialize success flag
     search_success = False
@@ -708,8 +594,7 @@ def test_search_engine(engine, url, query, duration, baseline_overheads, driver)
     
     # If search was successful, wait for the specified duration
     if search_success:
-        wait_time = random.uniform(1, duration)
-        wait_time = 20
+        wait_time = 60
         log_message(f"Waiting {wait_time:.1f} seconds before next query...")
         time.sleep(wait_time)
         
@@ -717,10 +602,9 @@ def test_search_engine(engine, url, query, duration, baseline_overheads, driver)
         end_time = int(datetime.now().timestamp() * 1000)
         
         wait_for_internet()
-        # log_message(f"Internet available")
 
         keep_system_awake()
-        # log_message(f"System awake and internet available")
+
         # Clean up
         driver.delete_all_cookies()
         
@@ -741,7 +625,6 @@ def test_search_engine(engine, url, query, duration, baseline_overheads, driver)
         driver.delete_all_cookies()
         return None
 
-
 def run_tests(engines, queries, duration, baseline_overheads, driver):
     results = []
 
@@ -761,14 +644,10 @@ def run_tests(engines, queries, duration, baseline_overheads, driver):
             else:
                 log_message(f"Failed to test {engine}")
             
-            # Wait before the next test
-            # if engine != shuffled_engines[-1][0]:  # Skip wait after the last engine
-            #     wait_time = interval + random.uniform(0.5, 1.5)  # Add random component
     log_message(f"Waiting {duration:.1f} seconds before next test...")
     time.sleep(duration)
     
     return results
-
 
 def save_results(results, output_file):
     # Create directory if it doesn't exist
@@ -789,7 +668,6 @@ def save_results(results, output_file):
     if missing_engines:
         log_message(f"Engines that failed: {', '.join(missing_engines)}")
 
-
 def main():
     log_message("Starting search engine energy measurement")
     log_message("Make sure your system is in zen mode (minimal background processes)")
@@ -797,10 +675,6 @@ def main():
 
     # Perform system warm-up
     warm_up()
-    # baseline_overheads = {}
-    # for engine, url in SEARCH_ENGINES.items():
-    #     baseline_overheads[engine] = measure_baseline(engine, url)
-    print(BASE_LINE_OVERHEAD)
     
     log_message(f"Baseline overheads: {BASE_LINE_OVERHEAD}")
     driver = DriverManager.get_driver()

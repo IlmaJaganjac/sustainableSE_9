@@ -15,10 +15,7 @@ OUTPUT_FILE = "results/final_energy_results.csv"
 PAIRWISE_RESULTS_FILE = "results/pairwise_comparisons.csv"
 STAT_TEST_FILE = "results/statistical_tests.csv"
 
-
-
 BUFFER = int(os.getenv("INTERVAL", 200))  # Default to 200 if not set
-
 W = [1,2,3]
 
 def log_message(message):
@@ -88,20 +85,24 @@ def calculate_energy_consumption(timestamps_df, energy_df):
     log_message("Calculating energy consumption per iteration.")
     results = []
     sample_rows = []
-
+    wait_time = 60
     for idx, row in timestamps_df.iterrows():
         engine = row["Search Engine"]
         normalized_duration = row["Normalized Duration (ms)"]
-        # if query took 2 seconds more than the baseline remove this overhead probably due to selenium.
-        start_time = row["Start Time"] + row['Baseline Overhead (ms)'] if normalized_duration > 1000 else row["Start Time"] 
+
+        # if query took 1 second more than the baseline remove this overhead probably due to selenium.
+        start_time = int(row["Start Time"] + row['Baseline Overhead (ms)']) if normalized_duration > 1000 else int(row["Start Time"])
+        # start_time = row['Start Time']
         end_time = row["End Time"]
+
+        if start_time > end_time:
+            print("Start time is greater than end time. Skipping this iteration.")
+
         iteration = row["Iteration"]
-        log_message(f"Processing {engine} - Iteration {iteration}: {start_time} to {end_time}")
         buffer_ms = BUFFER
         
         iter_df = energy_df[(energy_df["Time"] >= (start_time - buffer_ms)) &
                          (energy_df["Time"] <= (end_time + buffer_ms))]
-        
         if iter_df.empty:
             log_message(f"Warning: No energy data for {engine} Iteration {iteration}")
             res = {"Search Engine": engine, "Iteration": iteration,
@@ -178,6 +179,9 @@ def statistical_tests(results_df):
         metric_details = {}
         all_normal = True
         for engine in results_df["Search Engine"].unique():
+            print()
+            na_values = results_df[results_df["Search Engine"] == engine][metric][results_df[results_df["Search Engine"] == engine][metric].isna()]
+            print(f"NaN values for {engine} - {metric}: {na_values}")
             values = results_df[results_df["Search Engine"] == engine][metric].dropna().values
             # print(f"{engine} - {metric}: {len(values)} values {values}") 
             detail = {}
@@ -198,7 +202,16 @@ def statistical_tests(results_df):
             
             if p < 0.05:
                 # Remove outliers and retest
-                filtered_values = remove_outliers_zscore(values)
+                def remove_outliers_iqr(values, df, col, engine):
+                    Q1 = df[col].quantile(0.25)
+                    Q3 = df[col].quantile(0.75)
+                    IQR = Q3 - Q1
+                  
+
+                    outliers = values[(values < Q1 - 1.5 * IQR) | (values > Q3 + 1.5 * IQR)]
+                    final = values[~np.in1d(values, outliers)]
+                    return final
+                filtered_values = remove_outliers_iqr(values, results_df[results_df["Search Engine"] == engine], metric, engine)
                 if len(filtered_values) < 3:
                     detail["filtered_stat"] = None
                     detail["filtered_p"] = None
@@ -227,7 +240,7 @@ def statistical_tests(results_df):
         overall_normal[metric] = all_normal
     return normality_details, overall_normal
 
-def pairwise_comparisons_metric(results_df, metric, is_normal=True):
+def pairwise_comparisons_metric(results_df, metric, normality_details, is_normal=True):
     """
     For each pair of search engines, perform a pairwise statistical test on the given metric.
     
@@ -237,17 +250,35 @@ def pairwise_comparisons_metric(results_df, metric, is_normal=True):
     Returns:
       A DataFrame containing the pairwise comparison results for the specified metric.
     """
+
+
     engines = results_df["Search Engine"].unique()
     comp_results = []
-    
     for i in range(len(engines)):
-        for j in range(i+1, len(engines)):
+        for j in range(len(engines)):
             engA = engines[i]
             engB = engines[j]
-            dataA = results_df[results_df["Search Engine"] == engA][metric].dropna()
-            dataB = results_df[results_df["Search Engine"] == engB][metric].dropna()
+           
+                    
+            dataA = results_df[results_df["Search Engine"] == engA][metric]
+            dataB = results_df[results_df["Search Engine"] == engB][metric]
+            # Print NaN values for both engines
+            nan_values_A = dataA[dataA.isna()]
+            nan_values_B = dataB[dataB.isna()]
+            
+            if not nan_values_A.empty:
+                print(f"NaN values for {engA}: {nan_values_A}")
+            if not nan_values_B.empty:
+                print(f"NaN values for {engB}: {nan_values_B}")
+            dataA = dataA.dropna()
+            dataB = dataB.dropna()
             if len(dataA) < 2 or len(dataB) < 2:
+                print(f"Not enough data for {engA} vs. {engB}")
                 continue
+            
+            is_normal_A = normality_details[metric][engA]["is_normal"]
+            is_normal_B = normality_details[metric][engB]["is_normal"]
+            is_normal = (is_normal_A is True) and (is_normal_B is True)
             
             if is_normal:
                 # Welch's t-test
@@ -267,7 +298,7 @@ def pairwise_comparisons_metric(results_df, metric, is_normal=True):
                 effect_size = u_stat / (n1 * n2)
             
             pct_change = ((dataB.mean() - dataA.mean()) / dataA.mean() * 100) if dataA.mean() != 0 else np.nan
-            
+            # print(f"{engA} vs. {engB}: stat={effect_size:.4f}, p={p_val:.4f}, pct change={pct_change:.2f}%")
             comp_results.append({
                 "Metric": metric,
                 "Engine A": engA,
@@ -299,6 +330,13 @@ def main():
     log_message("Starting energy analysis with iterations.")
     try:
         timestamps_df, energy_df = load_data(TIMESTAMPS_FILE, ENERGY_LOG_FILE)
+        timestamps_df["End Time"] -= 60000
+        timestamps_df.loc[timestamps_df["Search Engine"] == "Google", "Baseline Overhead (ms)"] = 10998.466666666667
+        timestamps_df["Baseline Overhead (ms)"] /= 4
+        timestamps_df["Normalized Duration (ms)"] = (timestamps_df["End Time"] - timestamps_df["Start Time"]) - timestamps_df["Baseline Overhead (ms)"]
+
+        save_results(timestamps_df, "results/test_time.csv")
+
         iter_results_df, sample_results_df = calculate_energy_consumption(timestamps_df, energy_df)
         save_results(iter_results_df, OUTPUT_FILE)
 
@@ -322,9 +360,11 @@ def main():
                 })
         norm_df = pd.DataFrame(norm_rows)
         save_results(norm_df, STAT_TEST_FILE)
+        print(overall_normal)
+        normality_details, overall_normal = statistical_tests(iter_results_df)
+        pairwise_energy = pairwise_comparisons_metric(iter_results_df, "Total Energy (J)", normality_details)
+        pairwise_power = pairwise_comparisons_metric(iter_results_df, "Average Power (W)", normality_details)
 
-        pairwise_energy = pairwise_comparisons_metric(iter_results_df, "Total Energy (J)", is_normal=overall_normal["Total Energy (J)"])
-        pairwise_power = pairwise_comparisons_metric(iter_results_df, "Average Power (W)", is_normal=overall_normal["Average Power (W)"])
 
         combined_pairwise = pd.concat([pairwise_energy, pairwise_power], ignore_index=True)
         save_results(combined_pairwise, PAIRWISE_RESULTS_FILE)

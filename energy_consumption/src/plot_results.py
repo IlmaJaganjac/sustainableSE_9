@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 FINAL_ENERGY_FILE = "results/final_energy_results.csv"
-# FINAL_ENERGY_FILE = "results/filtered_data.csv"
-
 SAVE_FIG_DIR = "results/plots"
+TIMESTAMPS_FILE = "search_engine_results/search_engine_timestamps.csv"
 
 def log_message(message):
     """Print a timestamped log message."""
@@ -211,14 +210,33 @@ def plot_pairwise_comparison_heatmaps(df, value_col="Percentage Change (%)", out
         plt.close()
         print(f"Saved heatmap for {metric} to {output_path}")
 
+def plot_selenium_energy(df):
+    """
+    Plots bar charts showing the percentage of baseline overhead compared to raw duration
+    and the percentage of actual query time compared to raw duration for each search engine.
+    """
+    df["Baseline Overhead (%)"] = df["Baseline Overhead (ms)"] / df["Raw Duration (ms)"] * 100
+    df["Actual Query Time (%)"] = (df["Raw Duration (ms)"]-df["Baseline Overhead (ms)"]) / df["Raw Duration (ms)"] * 100 + df["Baseline Overhead (%)"]
+    
+    avg_overhead_df = df.groupby("Search Engine", as_index=False)[["Baseline Overhead (%)", "Actual Query Time (%)"]].mean()
+    
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=avg_overhead_df, x="Search Engine", y="Baseline Overhead (%)", label="Baseline Overhead")
+    sns.barplot(data=avg_overhead_df, x="Search Engine", y="Actual Query Time (%)", label="Actual Query Time", alpha=0.4)
+    
+    plt.title("Selenium Overhead and Actual Query Time Percentage")
+    plt.ylabel("Percentage of Raw Duration (%)")
+    plt.legend(title="Metric")
+    plt.tight_layout()
+    plt.savefig(os.path.join(SAVE_FIG_DIR, "barplot_selenium_metrics.png"))
+    plt.close()
 
 def main():
     ensure_dir(SAVE_FIG_DIR)
     
     # 1) Read the final energy results
     df = pd.read_csv(FINAL_ENERGY_FILE)
-    # df = df.dropna(inplace=False)
-    print(df.columns)
+
     # Parse the "Energy Delay Product" column (which is a list string like "[123.4, 567.8, 9012.3]")
     edp_w1, edp_w2, edp_w3 = [], [], []
     for edp_str in df["Energy Delay Product"]:
@@ -311,7 +329,10 @@ def main():
 
 
     df_comparision = pd.read_csv("results/pairwise_comparisons.csv")
-    # plot_percentage_changes(df_comparision, output_path=os.path.join(SAVE_FIG_DIR, "pairwise_comparisons.png"))
     plot_pairwise_comparison_heatmaps(df_comparision)
+
+    df = pd.read_csv(TIMESTAMPS_FILE)
+    plot_selenium_energy(df)
+    
 if __name__ == "__main__":
     main()

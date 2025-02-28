@@ -6,6 +6,8 @@ from datetime import datetime
 import pandas as pd
 import socket
 import platform
+import csv
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -16,6 +18,42 @@ from selenium.common.exceptions import (
     ElementClickInterceptedException)
 
 from selenium.webdriver.common.action_chains import ActionChains
+
+def handle_startpage(driver, query):
+    try:
+        # Wait for the search box with multiple possible selectors
+        search_box = None
+        selectors = [
+            (By.NAME, "query"),
+            (By.CSS_SELECTOR, "input[type='text']"),
+            (By.CSS_SELECTOR, "input[type='search']")
+        ]
+        
+        for selector_type, selector_value in selectors:
+            try:
+                search_box = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable((selector_type, selector_value))
+                )
+                break
+            except TimeoutException:
+                continue
+        
+        if search_box:
+            # Clear using JavaScript
+            driver.execute_script("arguments[0].value = '';", search_box)
+            time.sleep(1)
+            
+            # Input text using JavaScript
+            driver.execute_script(f"arguments[0].value = '{query}';", search_box)
+            time.sleep(1)
+            
+            search_box.send_keys(Keys.RETURN)
+            return True
+            
+        return False
+    except Exception as e:
+        log_message(f"Error with Startpage search: {e}")
+        return False
 
 
 def check_internet():
@@ -28,13 +66,13 @@ def check_internet():
 
 def wait_for_internet(polling_interval=10):
     """Pauses execution and waits until an internet connection is restored."""
-    log_message("No internet connection. Pausing execution...")
+    # log_message("No internet connection. Pausing execution...")
     
     while not check_internet():
         log_message(f"No internet detected. Retrying in {polling_interval} seconds...")
         time.sleep(polling_interval)  # Wait before checking again
     
-    log_message("Internet connection restored. Resuming execution...")
+    # log_message("Internet connection restored. Resuming execution...")
 
 
 def setup_driver(max_attempts=3):
@@ -43,7 +81,7 @@ def setup_driver(max_attempts=3):
     for attempt in range(max_attempts):
         try:
             options = webdriver.ChromeOptions()
-            options.add_argument("--headless")
+            # options.add_argument("--headless")
             options.add_argument("--disable-gpu")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
@@ -103,34 +141,34 @@ def accept_cookie(driver, engine):
     This ensures the baseline includes the cookie acceptance overhead.
     """
     if engine == "Google":
+        """Handles Google search with improved error handling and multiple fallback methods"""
         try:
-            WebDriverWait(driver, 10).until(
-                EC.frame_to_be_available_and_switch_to_it(
-                    (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
-                )
-            )
-            log_message("Switched to Google consent iframe")
-        except TimeoutException:
-            log_message("No Google consent iframe found or already handled")
-        consent_texts = {
-            "English": "Accept All",
-            "Dutch": "Alles accepteren"
-        }
-        for lang, text in consent_texts.items():
+            # Avoid maximizing window unless necessary (most modern sites don’t need it)
+            # driver.maximize_window()
+
+            # 1. Handle consent dialog efficiently
+            consent_button_xpath = "//*[text()[normalize-space()='Accept All'] or text()[normalize-space()='Alles accepteren']]"
             try:
-                accept_button = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, f"//*[text()[normalize-space()='{text}']]")
+                # Check for iframe briefly (reduced from 10s to 3s)
+                WebDriverWait(driver, 3).until(
+                    EC.frame_to_be_available_and_switch_to_it(
+                        (By.XPATH, "//iframe[contains(@src, 'consent.google')]")
                     )
                 )
-                actions = webdriver.ActionChains(driver)
-                actions.move_to_element(accept_button).pause(random.uniform(0.5, 1)).click().perform()
-                log_message(f"Clicked consent button in {lang} ('{text}')")
-                time.sleep(random.uniform(1, 2))
-                break
-            except TimeoutException:
-                continue
-        driver.switch_to.default_content()
+                accept_button = WebDriverWait(driver, 2).until(
+                    EC.element_to_be_clickable((By.XPATH, consent_button_xpath))
+                )
+                driver.execute_script("arguments[0].click();", accept_button)  # Faster JS click
+                driver.switch_to.default_content()  # Switch back immediately
+                time.sleep(0.5)  # Minimal delay after consent
+            except:
+                # No consent iframe or already handled; proceed
+                driver.switch_to.default_content()
+
+            return True
+        except Exception as e:
+            log_message(f"Error with Google search: {e}")
+            return False
         
     elif engine == "Yahoo":
         max_attempts = 3
@@ -240,11 +278,22 @@ def accept_cookie(driver, engine):
             time.sleep(random.uniform(1, 2))
         except TimeoutException:
             log_message(f"No cookie dialog for {engine}")
-import csv
 
-def measure_baseline(engine, url, iterations = 30):
+def store_baseline_to_csv(engine, average_baseline, filename='baseline_results.csv'):
+    # Open in write mode to start a new file each time
+    with open(filename, 'w', newline='') as csvfile:
+        fieldnames = ['Search Engine', 'Baseline Duration (ms)']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()  # Write header as the first row
+        writer.writerow({
+            'Search Engine': engine,
+            'Baseline Duration (ms)': average_baseline
+        })
+
+
+def measure_baseline(engine, url, iterations=1):
     """
-    Measures the baseline overhead for an engine by performing the minimal automation steps,
+    Measures the baseline overhead for an engine by performing minimal automation steps,
     including accepting cookies.
     """
     baseline_durations = []
@@ -255,6 +304,8 @@ def measure_baseline(engine, url, iterations = 30):
         time.sleep(random.uniform(0.5, 1.5))
         driver.get(url)
         time.sleep(random.uniform(1.5, 3.0))
+
+        handle_startpage(driver, "angular route uib tab")
         
         # Accept cookie to include its overhead in the baseline
         if engine == "Yahoo":
@@ -263,44 +314,30 @@ def measure_baseline(engine, url, iterations = 30):
                 log_message("Defaulting to predefined baseline for Yahoo (21676 ms)")
                 baseline_duration = 21676
             else:
-                 # Ensure it moves forward even if cookie handling took place
                 log_message(f"Continuing with baseline measurement for {engine}")
-
-                time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
-
-                # Measure end time
                 end_time = int(datetime.now().timestamp() * 1000)
                 baseline_duration = end_time - start_time
+                time.sleep(1)
+
         else:
             accept_cookie(driver, engine)
-        
-            # Ensure it moves forward even if cookie handling took place
             log_message(f"Continuing with baseline measurement for {engine}")
-
-            time.sleep(random.uniform(1, 2))  # Ensure any popups have time to disappear
-
-            # Measure end time
             end_time = int(datetime.now().timestamp() * 1000)
             baseline_duration = end_time - start_time
+            time.sleep(1)
 
         log_message(f"Baseline for {engine}: {baseline_duration} ms")
+        if baseline_duration > 40000:
+            # Skip abnormally large durations
+            continue
         baseline_durations.append(baseline_duration)
         driver.quit()
 
     average_baseline = sum(baseline_durations) / len(baseline_durations)
-    log_message(f"Average baseline for {engine}: {average_baseline:.2f} ms")
-    with open("baseline_average.csv", "w", newline="") as csvfile:
-        fieldnames = ["Search Engine", "Baseline Duration (ms)"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    log_message(f"Average baseline for {engine}: {average_baseline} ms")
 
-        # Write header
-        writer.writeheader()
+    return average_baseline
 
-        # Write data row
-        writer.writerow({
-            "Search Engine": engine,
-            "Baseline Duration (ms)": round(average_baseline, 3)  # Optional rounding
-        })
 
 def main():
     engines = {
@@ -317,8 +354,31 @@ def main():
     "Mojeek": "https://www.mojeek.com",
     "You.com": "https://you.com",
     }
+    
+    # 1) Gather results in a list of dicts
+    results = []
     for engine, url in engines.items():
-        measure_baseline(engine, url)
+        avg_baseline = measure_baseline(engine, url, iterations=30)
+        results.append({
+            "Search Engine": engine,
+            "Baseline Duration (ms)": avg_baseline
+        })
+    
+    output_file = '../baseline_average.csv'
+    
+    # 3) Save as CSV using pandas
+    try:
+        df = pd.DataFrame(results)
+        # Use sep=';' to use semicolons instead of commas
+        df.to_csv(output_file, index=False, sep=';')
+        log_message(f"Results saved to {output_file}")
+    except Exception as e:
+        log_message(f"Error saving to {output_file}: {e}")
+        # Fallback to current directory
+        fallback_file = 'baseline_average.csv'
+        df = pd.DataFrame(results)
+        df.to_csv(fallback_file, index=False, sep=';')
+        log_message(f"Results saved to fallback location: {fallback_file}")
 
 if __name__ == "__main__":
     main()
