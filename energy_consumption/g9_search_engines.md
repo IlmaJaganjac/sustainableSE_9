@@ -119,7 +119,7 @@ To further illustrate how these metrics affect efficiency, we also examined the 
 
 
 ### Energy Delay Product (EDP)
-  As can be seen from figure 2 a) time plays an signifcant role in our experiment. That is why we also measured the EDP. It is a metric that balances energy efficiency and execution speed. It is defined as:
+  As can be seen from figure 2a) time plays an signifcant role in our experiment. That is why we also measured the EDP. It is a metric that balances energy efficiency and execution speed. It is defined as:
 
 EDP = `E` * `t`^`w`
 
