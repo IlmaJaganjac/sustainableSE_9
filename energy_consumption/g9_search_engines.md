@@ -1,5 +1,5 @@
 ---
-author: Student1 First and Last Name, Angelos-Ermis Mangos, Marvin Blommestijn, Pravesha Ramsundersingh
+author: Ilma Jaganjac, Angelos-Ermis Mangos, Marvin Blommestijn, Pravesha Ramsundersingh
 title: "Energy Efficiency of Search Engines"
 image: "../img/p1_measuring_software/gX_template/cover.png"
 date: 28/02/2025
