@@ -106,7 +106,8 @@ The plots show the distribution of `Average Power (W)` and `Total Energy (J)` ac
 
 ###### Figure 1: Violin plots for the distribution per search engine for the metrics average power and total energy consumed 
 
-- The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in power consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
+
+- To further illustrate how these metrics affect efficiency, we also examined the temporal behavior of the power values and the total energy averaged over the 30 iterations. The line plot shows the average power (W) over time (in seconds), highlighting power-consumption patterns, while the histogram summarizes each search engine’s overall energy usage by displaying the average total energy (J).
 <!-- Aggregated metrics and histogram side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/aggregated_metrics.png" style="width:45%;" alt="Aggregated Metrics">
