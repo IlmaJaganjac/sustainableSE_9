@@ -93,7 +93,8 @@ With these metrics we have calculated the following;
 
 **Power** is the rate at which energy is used, measured in watts (`W`), where 1 W = 1 J/s.
   
-  - Power (W) = (`ΔEnergy` / `Δt`) * 1000  
+  - Power (W) = (`ΔEnergy` / `Δt`) * 1000
+    
 Here, `ΔEnergy` is the difference between consecutive energy measurements (in joules) and `Δt` is the time difference (in milliseconds) for the duration of the query execution.
 
 
