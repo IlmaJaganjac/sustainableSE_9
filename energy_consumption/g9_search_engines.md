@@ -1,8 +1,8 @@
 ---
-author: Student1 First and Last Name, Student2, Marvin Blommestijn
+author: Student1 First and Last Name, Student2, Marvin Blommestijn, Pravesha Ramsundersingh
 title: "Energy Efficiency of Search Engines"
 image: "../img/p1_measuring_software/gX_template/cover.png"
-date: 22/02/2025
+date: 2202/2025
 summary: |-
  
 ---
