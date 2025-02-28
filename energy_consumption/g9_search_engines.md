@@ -136,27 +136,6 @@ This study highlights significant differences in energy consumption, response ti
 
 For researchers interested in replicating this study, the complete replication package is available at our GitHub repository [^replication].
 
-# References
-[^replication]: [GitHub repository](https://github.com/IlmaJaganjac/sustainableSE_9/)
-[^energibrigde]: [Energibridge repo](https://github.com/tdurieux/EnergiBridge)  
-[^greenspector]:[Greenspector - Environmental impact of search engines apps](https://greenspector.com/en/search-engines/)  
-[^google]: [Google](https://www.google.com)  
-[^bing]: [Bing](https://www.bing.com)  
-[^yahoo]: [Yahoo](https://www.yahoo.com)  
-[^duckduckgo]: [DuckDuckGo](https://duckduckgo.com)  
-[^brave]: [Brave Search](https://search.brave.com)  
-[^ecosia]: [Ecosia](https://www.ecosia.org)  
-[^oceanhero]: [OceanHero](https://oceanhero.today)  
-[^startpage]: [Startpage](https://www.startpage.com)  
-[^qwant]: [Qwant](https://www.qwant.com)  
-[^swisscows]: [Swisscows](https://swisscows.com)  
-[^mojeek]: [Mojeek](https://www.mojeek.com)  
-[^metager]: [MetaGer](https://metager.org)  
-[^youcom]: [You.com](https://you.com)  
-[^perplexity]: [Perplexity AI](https://www.perplexity.ai)
-[^developersearches]: [Developer Searches](https://medium.com/design-bootcamp/the-hidden-insights-in-developers-google-searches-47f05030cd2d)
-
-
 # Appendix
 
 <details>
@@ -397,4 +376,25 @@ For researchers interested in replicating this study, the complete replication p
 
 
 ###### Table : Pairwise comparisons Average Power(W) using **Welch’s t-test (normal data)** and **Mann-Whitney U test (non-normal data).**
+
+
+# References
+[^replication]: [GitHub repository](https://github.com/IlmaJaganjac/sustainableSE_9/)
+[^energibrigde]: [Energibridge repo](https://github.com/tdurieux/EnergiBridge)  
+[^greenspector]:[Greenspector - Environmental impact of search engines apps](https://greenspector.com/en/search-engines/)  
+[^google]: [Google](https://www.google.com)  
+[^bing]: [Bing](https://www.bing.com)  
+[^yahoo]: [Yahoo](https://www.yahoo.com)  
+[^duckduckgo]: [DuckDuckGo](https://duckduckgo.com)  
+[^brave]: [Brave Search](https://search.brave.com)  
+[^ecosia]: [Ecosia](https://www.ecosia.org)  
+[^oceanhero]: [OceanHero](https://oceanhero.today)  
+[^startpage]: [Startpage](https://www.startpage.com)  
+[^qwant]: [Qwant](https://www.qwant.com)  
+[^swisscows]: [Swisscows](https://swisscows.com)  
+[^mojeek]: [Mojeek](https://www.mojeek.com)  
+[^metager]: [MetaGer](https://metager.org)  
+[^youcom]: [You.com](https://you.com)  
+[^perplexity]: [Perplexity AI](https://www.perplexity.ai)
+[^developersearches]: [Developer Searches](https://medium.com/design-bootcamp/the-hidden-insights-in-developers-google-searches-47f05030cd2d)
 
