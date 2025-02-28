@@ -195,7 +195,7 @@ Once normality is assessed, pairwise comparisons between search engines are perf
 - **Welch's t-test** for normally distributed data.
 - **Mann–Whitney U test** for non-normal data.
 
-Along with the significance tests (using a threshold of p < 0.05 to denote statistical significance), effect sizes are calculated to quantify the magnitude of the differences. Effect sizes, such as Cohen's d for normal data or rank-biserial correlations for non-normal data, provide a standardized measure to compare differences across groups. They help answer not just whether a difference is statistically significant, but also how large that difference is in practical terms.
+Along with the significance tests (using a threshold of p < 0.05 to denote statistical significance), effect sizes are calculated to quantify the magnitude of the differences. Effect sizes, such as Cohen's d for normal data or common effect size (U1/(N1*N2) for non-normal data, provide a standardized measure to compare differences across groups. They help answer not just whether a difference is statistically significant, but also how large that difference is in practical terms.
 
 ### Visualizing Effect Size and Significance
 
