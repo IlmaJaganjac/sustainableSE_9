@@ -70,13 +70,12 @@ During the initial runs, we observed unexpected variations in the recorded energ
  2. Baseline Measurement: To differentiate the energy cost of executing a search query from the inherent cost of simply loading the website, we measured the baseline time required to load the search engine's homepage and accept additional cookies without any query search. We then added this baseline time to the start timestamp of our query search experiment so that our results reflects the actual energy consumption solely for executing the query search. 
 
 # Results
-In this experiment, energy and power consumption were calculated to assess the efficiency of different search engines over 30 iterations. Below is an explanation of how these metrics were derived and what their outputs were:
+In this experiment, energy and power consumption were calculated to assess the efficiency of different search engines. Below is an explanation of how these metrics were derived and what their outputs were:
 
 ## Plots and Visualizations
-- **Performance Metrics:** -
+- **Performance Metrics:**
+  
 Energy & Power
-
-
 - **Power Calculation**: Power was calculated as the rate of energy change over time. i.e.:
   
 Power (W) = (`ΔEnergy` / `Δt` ) * 1000
@@ -94,7 +93,7 @@ These plots show the distribution of `Total Energy (J)` and `Average Power (W)` 
   <img src="../img/p1_measuring_software/g9_search_engines/violin_avg_power.png" style="width:90%;" alt="Violin Plot Average Power">
   <img src="../img/p1_measuring_software/g9_search_engines/violin_total_energy.png" style="width:90%;" alt="Violin Plot Total Energy">
 </div>
-- The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in energy consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
+- The line plot displays the average power (W) over time (seconds) across iterations, revealing temporal patterns in power consumption. The histogram shows the average total energy (J) per search engine, summarizing overall energy usage.
 <!-- Aggregated metrics and histogram side-by-side -->
 <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/aggregated_metrics.png" style="width:45%;" alt="Aggregated Metrics">
@@ -102,6 +101,7 @@ These plots show the distribution of `Total Energy (J)` and `Average Power (W)` 
 </div>
 
 - **Energy Delay Product (EDP):**
+  
 EDP is a metric that balances energy efficiency and execution speed. It is defined as:
 
 EDP = `E` * `t`^`w`
@@ -116,7 +116,7 @@ This plot illustrates the distribution of EDP values for `w=1` across all iterat
 
 ## Analysis
 The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. Heatmaps visualize these comparisons:
-- **Heatmaps**: These show the percentage change in `Average Power (W)` and `Total Energy (J)` between pairs of search engines, with color intensity indicating the magnitude of difference. Positive values indicate Engine B consumes more than Engine A, and vice versa.
+- These show the percentage change in `Average Power (W)` and `Total Energy (J)` between pairs of search engines, with color intensity indicating the magnitude of difference. Positive values indicate Engine B consumes more than Engine A, and vice versa.
 
 
 <!-- Heatmaps side-by-side -->
@@ -170,7 +170,7 @@ One of the key limitations of this study is that it only considers the client-si
 
 Another limitation is the controlled testing environment, which does not fully replicate real-world usage conditions. The experiment was conducted with a fixed set of developer-focused queries, a single test system, and under an isolated "Zen mode" to minimize background noise. However, in everyday scenarios, search engine energy consumption could be influenced by factors such as hardware variations, network conditions, browser configurations, and concurrent background processes. Additionally, packet loss and TCP retransmissions were reported during testing, requiring additional CPU work and increasing energy usage in some cases. Poor network conditions can introduce inconsistencies in energy consumption, making it difficult to isolate search engine efficiency from network-related inefficiencies. These external factors may cause differences in energy efficiency that this study does not account for, limiting the generalizability of the results to a broader audience.
 
-A further limitation resulted from the methodological adjustments required during the experimental design. Originally, the plan was to execute 16 queries per iteration. However, given that executing 16 queries would have required: query duration * 16 * 12 * 60-second wait per query * 30 iterations, plus an additional 30 minutes of waiting time per iteration + the uniform sleeps to appear more humanlike in the selenium queries —the estimated total runtime would have been roughly 100 hours. Consequently, the experiment was reduced to a single query per iteration. It could be debated that query-side handling is managed on the search engine side rather than on the client side, and therefore might not be applicable to our study; however, this remains a methodological constraint.
+A further limitation resulted from the methodological adjustments required during the experimental design. Originally, the plan was to execute 16 queries per iteration. However, given that executing 16 queries would have required: query duration * 16 * 12 * 60-second wait per query * 30 iterations, plus an additional 30 minutes of total  waiting time of the 1 min wait per iteration + the uniform sleeps to appear more humanlike in the selenium queries —the estimated total runtime would have been roughly 100 hours. Consequently, the experiment was reduced to a single query per iteration. It could be debated that query-side handling is managed on the search engine side rather than on the client side, and therefore might not be applicable to our study; however, this remains a methodological constraint.
 
 Another practical challenge encountered was the failure of Yahoo when using Selenium. Inspection of the process revealed that Yahoo's homepage contained a large number of advertisements, which made it difficult to reliably locate the search bar within the imposed 15-second timeout constraint.
 
