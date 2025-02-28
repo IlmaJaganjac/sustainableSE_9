@@ -111,6 +111,8 @@ Looking at power consumption trends, Swisscows exhibits the highest peaks in pow
 
 The comparative percentage change analyses between search engines further highlight Google’s dominance in energy consumption. Google’s total energy usage is consistently much higher when compared to any other engine, particularly against lightweight alternatives such as You.com and Startpage. The violin plots, which display power and total energy distributions, confirm that most search engines have relatively consistent energy usage patterns, whereas Google shows a wider spread along the y-axis, indicating a broader range of energy consumption levels across different queries. Additionally, Google remains the only search engine present in the duration range beyond 15 seconds in the memory usage plot, suggesting that it continues background processing even after returning search results. This behavior may contribute to its prolonged energy footprint. Overall, the results indicate that while Google remains a dominant force in search performance, its energy efficiency is notably lower than that of its competitors, raising questions about the trade-off between enhanced search functionality and sustainable computing practices.
 
+<!-- Insert paragraph on 'normal' results that Google is now in the middle -->
+
 - **Limitations:**
 One of the key limitations of this study is that it only considers the client-side energy consumption, meaning the power usage of the user's device while performing search queries. However, search engines rely on extensive backend infrastructure, including data centers, caching mechanisms, and network requests, which also contribute significantly to their overall energy footprint. Since this study does not have access to backend server energy consumption data, it presents only a partial view of the environmental impact of different search engines. Future research would benefit from incorporating end-to-end energy consumption analysis, including network energy usage and server-side power draw, to provide a more holistic comparison of search engine sustainability.
 
@@ -127,6 +129,8 @@ And finally, future work could explore the sustainability impact of cookies, as 
 
 # Conclusion
 This study highlights significant differences in energy consumption, response time, and efficiency across search engines, with Google standing out as the least energy-efficient due to its long response times and high energy delay product. In contrast, You.com and Swisscows emerged as the most efficient options, demonstrating both lower response times and reduced energy consumption. While some search engines optimized performance by minimizing background processes, variations in power usage suggest differences in how results are processed and displayed. The findings emphasize the trade-off between enhanced functionality and sustainability, raising questions about the environmental impact of widely used search engines. Although the analysis focused on client-side energy consumption, future research should incorporate backend infrastructure energy usage, as well as factors like network transmission, cookies, and long-term energy trends. Expanding the study to diverse hardware setups, internet conditions, and emerging AI-driven search engines could further enhance our understanding of digital sustainability.
+
+<!-- Edit conclusion to also mention the 'normal' plots of Google -->
 
 # Replication Package
 
