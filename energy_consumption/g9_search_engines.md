@@ -128,6 +128,7 @@ This plot illustrates the distribution of EDP values for `w=1` across all iterat
   <img src="../img/p1_measuring_software/g9_search_engines/boxplot_edp_w=1.png" style="width:90%" alt="Energy Delay Product">
 </div>
 
+###### Figure 3: Energy Delay Product per search engine
 
 ## Analysis
 The analysis leverages statistical tests and pairwise comparisons to evaluate differences in energy and power metrics across search engines. Heatmaps visualize these comparisons:
@@ -141,6 +142,8 @@ The analysis leverages statistical tests and pairwise comparisons to evaluate di
   <img src="../img/p1_measuring_software/g9_search_engines/heatmap_Total_Energy_(J).png" style="width:45%;" alt="Heatmap Total Energy">
 </div>
 
+###### Figure 4: a) Heatmap comparsion of Average Power percentage change  b) Total Energy percentage change
+
 ## Additional Factors
 The bar plot quantifies the percentage of Selenium overhead versus actual query time in raw duration, showing its influence on measurements. The memory plot tracks average used memory over time, providing context on resource utilization alongside energy metrics.
 <!-- Selenium impact image -->
@@ -151,6 +154,8 @@ The bar plot quantifies the percentage of Selenium overhead versus actual query 
 <!-- <div style="margin-top: 20px;"> -->
   <img src="../img/p1_measuring_software/g9_search_engines/memory_across_iterations.png" style="width:45%;" alt="Memory Across Iterations">
 </div>
+
+###### Figure 5: a) Percentage of baseline duration to the total query search duration  b) Memory usage per search engine
 
 ## Statistical Evaluation  
 The statistical evaluation of the energy and power metrics provides insight into the differences between search engines and the reliability of these differences.
@@ -171,7 +176,7 @@ The table above summarizes the test statistics and corresponding p-values for ea
 | Total Energy (J) - Stat        | 0.960868 |     0.883144   |  0.933326    | 0.902688   | 0.9719    | 0.923369  | 0.817257    | 0.936237  | 0.74704     |   0.973414  | 0.713108    |
 | Total Energy (J) - p-value     | 0.456122 |     0.00671238 |  0.103737    | 0.015419   | 0.67303   | 0.0476219 | 0.000276575 | 0.134423  | 1.88191e-05 |   0.712884  | 3.26145e-06 |
 
-###### Table : Shapiro-Wilik test result for the metrics Average Power (w) and Total Energy (J) per search engine (the data has outliers removed)
+###### Table 1: Shapiro-Wilik test result for the metrics Average Power (w) and Total Energy (J) per search engine (the data has outliers removed)
 
 ## Pairwise Comparisons and Effect Size
 Once normality is assessed, pairwise comparisons between search engines are performed to understand the differences in energy consumption and power usage. The analysis employs:
@@ -192,6 +197,8 @@ The scatter plot visualizes the effect sizes along with the significance levels:
 <div style="margin-top: 20px;">
   <img src="../img/p1_measuring_software/g9_search_engines/effect_size_significance_scatter.jpg" style="width:90%;" alt="Effect Size Significance">
 </div>
+
+###### Figure 6: Statistical signifance check for normal data via Welch's test (left side) and non normal data Nabb-Whitney U (right side) against effect size. 
 
 ### Importance of the Findings
 
