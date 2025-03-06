@@ -29,6 +29,11 @@ The system uses Chrome and ChromeDriver for automation:
 2. Download the appropriate ChromeDriver version from [https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
 3. Place the ChromeDriver executable in your PATH
 
+### Clone the repository
+Use the git clone command to clone the repository.
+```bash
+git clone https://github.com/username/sustainableSE_9.git
+```
 ### EnergiBridge
 
 EnergiBridge is used to collect energy consumption metrics. You should clone the EnergiBridge repository inside this project's directory:
@@ -54,16 +59,11 @@ Make sure Rust and Cargo are installed on your system to build EnergiBridge.
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/search-engine-energy-measurement.git
-   cd search-engine-energy-measurement
+   git clone https://github.com/username/sustainableSE_9.git
+   cd energy_consumption
    ```
 
-2. Create necessary directories:
-   ```bash
-   mkdir -p search_engine_results results plots
-   ```
-
-3. Make sure EnergiBridge is properly set up inside the repository:
+2. Make sure EnergiBridge is properly set up inside the repository:
    ```bash
    git clone https://github.com/DEEDS-TUD/EnergiBridge.git
    cd EnergiBridge
