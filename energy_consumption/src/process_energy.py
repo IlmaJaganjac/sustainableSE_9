@@ -85,6 +85,7 @@ def calculate_energy_consumption(timestamps_df, energy_df):
     log_message("Calculating energy consumption per iteration.")
     results = []
     sample_rows = []
+    sample_data = pd.DataFrame()
     wait_time = 60
     for idx, row in timestamps_df.iterrows():
         engine = row["Search Engine"]
@@ -128,24 +129,27 @@ def calculate_energy_consumption(timestamps_df, energy_df):
                    "Temperature": avg_temp
                    }
         # print(sample_data.columns)
-        for i, r in sample_data.iterrows():
-            sample_row = {
-                "Search Engine": engine,
-                "Iteration": iteration,
-                "Time": r["Time"],
-                "Start_Time": start_time,
-                "Power (W)": r.get("SYSTEM_POWER (Watts)", r.get("Power (W)", None))
-            }
-            if "CPU_USAGE" in r:
-                sample_row["CPU_USAGE"] = r["CPU_USAGE"]
-            for col in r.index:
-                if "CPU_TEMP" in col:
-                    sample_row[col] = r[col]
-            if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
-                sample_row["USED_MEMORY"] = r["USED_MEMORY"]
-                sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
-                    
-            sample_rows.append(sample_row)
+        if sample_data.empty:
+            log_message(f"Warning: No sample data for {engine} Iteration {iteration}")
+        else:
+            for i, r in sample_data.iterrows():
+                sample_row = {
+                    "Search Engine": engine,
+                    "Iteration": iteration,
+                    "Time": r["Time"],
+                    "Start_Time": start_time,
+                    "Power (W)": r.get("SYSTEM_POWER (Watts)", r.get("Power (W)", None))
+                }
+                if "CPU_USAGE" in r:
+                    sample_row["CPU_USAGE"] = r["CPU_USAGE"]
+                for col in r.index:
+                    if "CPU_TEMP" in col:
+                        sample_row[col] = r[col]
+                if "USED_MEMORY" in r and "TOTAL_MEMORY" in r:
+                    sample_row["USED_MEMORY"] = r["USED_MEMORY"]
+                    sample_row["TOTAL_MEMORY"] = r["TOTAL_MEMORY"]
+                        
+                sample_rows.append(sample_row)
     
         results.append(res)
     iter_results_df = pd.DataFrame(results)
