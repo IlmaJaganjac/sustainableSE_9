@@ -24,6 +24,7 @@ def run_measurement_pipeline():
 
     # List of modules to run in order
     modules_to_run = [
+        'baseline_measurement',
         'measure',
         'process_energy',
         'plot_results'
