@@ -81,7 +81,7 @@ def setup_driver(max_attempts=3):
     for attempt in range(max_attempts):
         try:
             options = webdriver.ChromeOptions()
-            # options.add_argument("--headless")
+            options.add_argument("--headless")
             options.add_argument("--disable-gpu")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
