@@ -364,7 +364,7 @@ def main():
             "Baseline Duration (ms)": avg_baseline
         })
     
-    output_file = '../baseline_average.csv'
+    output_file = 'baseline_average.csv'
     
     # 3) Save as CSV using pandas
     try:

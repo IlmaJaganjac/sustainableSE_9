@@ -59,7 +59,7 @@ DEFAULT_WARMUP = 300 #300  # Warmup duration in seconds (should be 300 for real 
 OUTPUT_FILE = "search_engine_results/search_engine_timestamps.csv"
 ITERATIONS = 30 #30  # Number of test iterations
 
-baseline_df = pd.read_csv("baseline_average.csv")
+baseline_df = pd.read_csv("baseline_average.csv", sep=";")
 BASE_LINE_OVERHEAD = baseline_df.set_index("Search Engine")["Baseline Duration (ms)"].to_dict()
 
 def check_internet():
