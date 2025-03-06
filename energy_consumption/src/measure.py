@@ -594,7 +594,7 @@ def test_search_engine(engine, url, query, duration, baseline_overheads, driver)
     
     # If search was successful, wait for the specified duration
     if search_success:
-        wait_time = 60
+        wait_time = duration
         log_message(f"Waiting {wait_time:.1f} seconds before next query...")
         time.sleep(wait_time)
         

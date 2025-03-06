@@ -18,6 +18,8 @@ STAT_TEST_FILE = "results/statistical_tests.csv"
 BUFFER = int(os.getenv("INTERVAL", 200))  # Default to 200 if not set
 W = [1,2,3]
 
+from measure import DEFAULT_DURATION as wait_time
+
 def log_message(message):
     """Print a timestamped log message."""
     print(f"[{datetime.now()}] {message}")
@@ -86,7 +88,7 @@ def calculate_energy_consumption(timestamps_df, energy_df):
     results = []
     sample_rows = []
     sample_data = pd.DataFrame()
-    wait_time = 60
+
     for idx, row in timestamps_df.iterrows():
         engine = row["Search Engine"]
         normalized_duration = row["Normalized Duration (ms)"]
@@ -95,6 +97,7 @@ def calculate_energy_consumption(timestamps_df, energy_df):
         start_time = int(row["Start Time"] + row['Baseline Overhead (ms)']) if normalized_duration > 1000 else int(row["Start Time"])
         # start_time = row['Start Time']
         end_time = row["End Time"]
+        print(f"Start time: {start_time}, end time: {end_time} {end_time - start_time}")
 
         if start_time > end_time:
             print("Start time is greater than end time. Skipping this iteration.")
@@ -334,7 +337,7 @@ def main():
     log_message("Starting energy analysis with iterations.")
     try:
         timestamps_df, energy_df = load_data(TIMESTAMPS_FILE, ENERGY_LOG_FILE)
-        timestamps_df["End Time"] -= 60000
+        timestamps_df["End Time"] -= wait_time * 1000
         timestamps_df["Baseline Overhead (ms)"] /= 4
         timestamps_df["Normalized Duration (ms)"] = (timestamps_df["End Time"] - timestamps_df["Start Time"]) - timestamps_df["Baseline Overhead (ms)"]
 
